@@ -1,2 +1,2 @@
 # ReviewPilot
-AI Powered Code Reviewer Agent 
+An event-driven AI code intelligence platform integrated with GitHub.
