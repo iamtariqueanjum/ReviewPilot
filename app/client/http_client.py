@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import requests
 import logging
-# from requests.adapters import HTTPAdapter
-# from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
+
 
 class APIClient(object):
 
@@ -11,17 +14,17 @@ class APIClient(object):
         self.base_url = base_url
         self.headers = headers or {}
         self.session = requests.Session()
-        # self.retry_strategy = Retry(
-        #     total=retries,
-        #     backoff_factor=0.3,
-        #     status_forcelist=[429, 500, 502, 503, 504], # TODO add other statuses if needed
-        #     allowed_methods=["GET", "POST"], # TODO add other methods if needed
-        # )
-        # self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
-        # self.session.mount("http://", self.adapter)
-        # self.session.mount("https://", self.adapter)
+        self.retry_strategy = Retry(
+            total=retries,
+            backoff_factor=0.3,
+            status_forcelist=[429, 500, 502, 503, 504], # TODO add other statuses if needed
+            allowed_methods=["GET", "POST"], # TODO add other methods if needed
+        )
+        self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
+        self.session.mount("http://", self.adapter)
+        self.session.mount("https://", self.adapter)
 
-    def request(self, method, path, params, json, data, headers, timeout=10):
+    def request(self, method, path, params=None, json=None, data=None, timeout=10):
         url = f"{self.base_url}{path}"
         resp = self.session.request(
             method=method.upper(),
@@ -47,4 +50,3 @@ class APIClient(object):
         except Exception as err:
             logger.exception(f"Error while calling API : {str(err)}: {method} {path}")
         return response
-
