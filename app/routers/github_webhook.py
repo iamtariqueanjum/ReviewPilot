@@ -1,7 +1,8 @@
 import logging
 
 from fastapi import APIRouter, Request
-from app.utils.constants import GitHubWHAction
+
+from app.utils.constants import GitHubWHAction, Routes
 from app.utils.install_token_gen import get_installation_token
 from app.utils.security_util import verify_github_webhook
 
@@ -10,7 +11,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post('/github-webhook')
+@router.post(Routes.GITHUB_WEBHOOK)
 async def github_webhook(request: Request):
     print("Received GitHub webhook payload:\n")
     print(f"Headers: {request.headers}\n")
@@ -55,14 +56,14 @@ async def github_webhook(request: Request):
         elif event == "installation":
             handle_installation_event(payload)
                  
-                if event == "pull_request" and action == "opened":
-                    run_ai_review()
-                
-                elif event == "pull_request" and action == "synchronize":
-                    re_review_changes()
-                
-                elif event == "pull_request" and action == "closed" and merged:
-                    update_repo_embeddings()
+        if event == "pull_request" and action == "opened":
+            run_ai_review()
+        
+        elif event == "pull_request" and action == "synchronize":
+            re_review_changes()
+        
+        elif event == "pull_request" and action == "closed" and merged:
+            update_repo_embeddings()
         '''
 
 
