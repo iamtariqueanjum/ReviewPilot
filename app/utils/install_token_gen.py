@@ -3,6 +3,9 @@ import time
 import jwt
 import requests
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def generate_jwt() -> str:
     GITHUB_APP_ID = os.getenv("GITHUB_APP_ID")
@@ -23,5 +26,7 @@ def generate_jwt() -> str:
 
 def get_installation_token(installation_id: int) -> str:
     jwt_token = generate_jwt()
-
+    print(f"Generated JWT token: {jwt_token}\n")
+    # TODO make a POST request to GitHub API to exchange JWT for installation access token
     # url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+    return str(installation_id)
