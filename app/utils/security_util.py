@@ -23,7 +23,6 @@ def verify_github_webhook(payload_body: bytes, signature: str) -> bool:
             payload_body or b"",
             hashlib.sha256
         ).hexdigest()
-        print(f"Expected signature: {expected_signature}")
         return hmac.compare_digest(expected_signature, signature)
     except Exception:
         logger.exception("Error while verifying GitHub webhook signature")
