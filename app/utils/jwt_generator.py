@@ -3,13 +3,11 @@ from __future__ import annotations
 import os
 import time
 import jwt
-import requests
 import logging
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from app.client.github_client import GitHubClient
 
 logger = logging.getLogger(__name__)
 
@@ -32,17 +30,3 @@ def generate_jwt() -> str:
     }
     encoded_jwt_token = jwt.encode(payload, signing_key, algorithm="RS256")
     return encoded_jwt_token
-
-
-def get_installation_token(installation_id: int) -> str:
-    jwt_token = generate_jwt()
-
-    client = GitHubClient(jwt_token=jwt_token)
-    try:
-        installation_token = client.get_installation_access_token(installation_id)
-        logger.info("Fetched installation token for installation_id=%s", installation_id)
-        print(f"Installation token for installation_id={installation_id}: {installation_token}")
-        return installation_token
-    except Exception:
-        logger.exception("Failed to fetch installation token for %s", installation_id)
-        raise

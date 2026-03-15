@@ -7,4 +7,7 @@ app.include_router(github_webhook_router)
 
 @app.get('/')
 def home():
-    return {'message': 'Hello World'}
+    return {'message': 'Welcome to ReviewPilot!'}
+
+
+# TODO exception handling, logging, metrics, etc.
