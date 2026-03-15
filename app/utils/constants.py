@@ -3,7 +3,9 @@ from enum import Enum
 
 class GitHubWHAction(str, Enum):
     CREATED = "created"
+    DELETED = "deleted"
     OPENED = "opened"
+    REOPENED = "reopened"
     CLOSED = "closed"
     SYNCHRONIZE = "synchronize"
 
@@ -11,6 +13,7 @@ class GitHubWHAction(str, Enum):
 class GitHubWHEvent(str, Enum):
     INSTALLATION = "installation"
     PULL_REQUEST = "pull_request"
+    ISSUE_COMMENT = "issue_comment"
     PUSH = "push"
 
 

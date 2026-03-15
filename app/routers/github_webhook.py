@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 
 from app.utils.constants import Routes
 from app.utils.security_util import verify_github_webhook
-from app.handlers.webhook_event_handler import WebhookEventHandler
+from app.event_handlers.webhook_event_dispatch import WebhookEventDispatcher
 
 
 router = APIRouter()
@@ -25,6 +25,6 @@ async def github_webhook(request: Request):
     if not verify_github_webhook(body, signature):
         return {"error": "Invalid webhook signature", "status": "error"}
 
-    WebhookEventHandler.handle_event(event, payload)
+    WebhookEventDispatcher().dispatch(event, payload)
 
     return {"message": "Webhook processed successfully", "status": "success"}
