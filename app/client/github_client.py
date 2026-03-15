@@ -15,7 +15,6 @@ class GitHubClient(object):
 
     def __init__(self, installation_id, retries=3, timeout=10):
         self.installation_id = installation_id
-        self.jwt_token = generate_jwt()
         self.base_url = BaseUrls.GITHUB_API.value
         self.session = requests.Session()
         self.retry_strategy = Retry(
@@ -28,10 +27,9 @@ class GitHubClient(object):
         self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
         self.session.mount("http://", self.adapter)
         self.session.mount("https://", self.adapter)
-        self.installation_token = self.get_installation_access_token()
         self.headers = {
             "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {self.installation_token}"
+            "Authorization": f"Bearer {self.get_installation_access_token()}"
         }
 
     def request(self, method, path, params=None, json=None, data=None, timeout=10, headers=None):
@@ -66,7 +64,7 @@ class GitHubClient(object):
     def get_installation_access_token(self) -> str:
         try:
             path = Routes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
-            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {self.jwt_token}"}
+            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {generate_jwt()}"}
             result = self.call_api(HTTPMethod.POST, path, headers=headers)
             status = result.get("status_code")
             body = result.get("body")

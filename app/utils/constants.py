@@ -5,6 +5,13 @@ class GitHubWHAction(str, Enum):
     CREATED = "created"
     OPENED = "opened"
     CLOSED = "closed"
+    SYNCHRONIZE = "synchronize"
+
+
+class GitHubWHEvent(str, Enum):
+    INSTALLATION = "installation"
+    PULL_REQUEST = "pull_request"
+    PUSH = "push"
 
 
 class HTTPMethod(str, Enum):
