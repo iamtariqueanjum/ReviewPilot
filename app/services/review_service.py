@@ -1,6 +1,11 @@
-from app.services.github_service import GithubService
+import logging
+
 from app.llm.llm_factory import LLMFactory
 from app.prompts.review_prompt import review_prompt
+from app.services.github_service import GithubService
+
+
+logging = logging.getLogger(__name__)
 
 
 class ReviewService(object):
@@ -13,7 +18,7 @@ class ReviewService(object):
 
     def review_pr(self, owner, repo, pr_number):
         print(f"Reviewing PR {owner}/{repo}#{pr_number}...\n")
+
         # TODO call GitHub API to fetch PR details and files changed in the PR using the GithubService
         # TODO call AI review module to review the PR and get the review comments/suggestions
         # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
-        pass

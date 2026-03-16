@@ -6,3 +6,4 @@ class ReviewRequest(BaseModel):
     repo: str
     pr_number: int
     installation_id: int
+    re_review: bool = False

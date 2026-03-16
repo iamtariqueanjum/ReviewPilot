@@ -28,12 +28,14 @@ class GithubService(object):
 
             if status and 200 <= status < 300:
                 return body
+            # TODO check logs
             logger.error("Failed to fetch PR details for %s/%s#%s: status=%s body=%s",
                          owner, repo, pr_number, status, body)
             print(f"Failed to fetch PR details for {owner}/{repo}#{pr_number}: status={status} body={body}")
             raise ValueError(f"Failed to fetch PR details for {owner}/{repo}#{pr_number}: status={status}")
 
         except Exception:
+            # TODO check logs
             logger.exception("Error while fetching PR details for %s/%s#%s", owner, repo, pr_number)
             raise
 
@@ -58,11 +60,13 @@ class GithubService(object):
                     status = file.get("status")
                     response.append({"filename": filename, "patch": patch, "status": status})
                 return response
+            # TODO check logs
             logger.error("Failed to fetch PR file details for %s/%s#%s: status=%s body=%s",
                          owner, repo, pr_number, status, body)
             raise ValueError(f"Failed to fetch PR file details for {owner}/{repo}#{pr_number}: status={status}")
 
         except Exception:
+            # TODO check logs
             logger.exception("Error while fetching PR file details for %s/%s#%s", owner, repo, pr_number)
             raise
 
@@ -81,11 +85,13 @@ class GithubService(object):
 
             if status and 200 <= status < 300:
                 return base64.b64decode(body.get("content", "")).decode("utf-8")
+            # TODO check logs
             logger.error("Failed to fetch PR file content for %s/%s#%s: status=%s body=%s",
                          owner, repo, path, status, body)
             raise ValueError(f"Failed to fetch PR file content for {owner}/{repo}#{path}: status={status}")
 
         except Exception:
+            # TODO check logs
             logger.exception("Error while fetching PR file content for %s/%s#%s", owner, repo, pr_number)
             raise
 
@@ -98,12 +104,14 @@ class GithubService(object):
 
             if status and 200 <= status < 300:
                 return body
+            # TODO check logs
             logger.error("Failed to post comment for %s/%s#%s: status=%s body=%s",
                          owner, repo, issue_number, status, body)
             print(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status} body={body}")
             raise ValueError(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status}")
 
         except Exception:
+            # TODO check logs
             logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)
             raise
 

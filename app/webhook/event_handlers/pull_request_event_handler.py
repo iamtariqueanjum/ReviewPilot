@@ -1,45 +1,67 @@
-from app.utils.constants import GitHubWHAction
+from app.clients.api_client import APIClient
+from app.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod
 
 
 class PullRequestEventHandler(object):
 
+    def __init__(self):
+        self.api_client = APIClient()
+        self.embedding_service = None  # TODO initialize embedding service
+
     def handle(self, payload):
         action = payload.get("action")
+
+        if action == GitHubWHAction.OPENED:
+            self.on_opened(payload)
+        elif action == GitHubWHAction.SYNCHRONIZE:
+            self.on_synchronize(payload)
+        elif action == GitHubWHAction.REOPENED:
+            self.on_reopened(payload)
+        elif action == GitHubWHAction.CLOSED:
+            self.on_closed(payload)
+
+    def on_opened(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
         repo = payload.get("repository").get("name")
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
+        installation_id = payload.get("installation", {}).get("id")
+        response = self.api_client.call_api(
+            method=HTTPMethod.POST,
+            path=APIEndpoints.REVIEW_PR.value,
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id}
+        )
 
-        if action == GitHubWHAction.OPENED:
-            self.on_opened(owner, repo, pr_number)
-        elif action == GitHubWHAction.SYNCHRONIZE:
-            self.on_synchronize(owner, repo, pr_number)
-        elif action == GitHubWHAction.REOPENED:
-            self.on_reopened(owner, repo, pr_number)
-        elif action == GitHubWHAction.CLOSED:
-            self.on_closed(owner, repo, pr_number, payload)
+    def on_synchronize(self, payload):
+        owner = payload.get("repository", {}).get("owner", {}).get("login")
+        repo = payload.get("repository").get("name")
+        pr = payload.get("pull_request", {})
+        pr_number = pr.get("number")
+        installation_id = payload.get("installation", {}).get("id")
+        response = self.api_client.call_api(
+            method=HTTPMethod.POST,
+            path=APIEndpoints.REVIEW_PR.value,
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id,
+                  "re_review": True}
+        )
 
-    @staticmethod
-    def on_opened(owner, repo, pr_number):
-        # TODO call AI review for the PR
-        print(f"Pull request has been opened... Pr is being reviewed...\n")
-        # review_service.review_pr(owner, repo, pr_number)
+    def on_reopened(self, payload):
+        owner = payload.get("repository", {}).get("owner", {}).get("login")
+        repo = payload.get("repository").get("name")
+        pr = payload.get("pull_request", {})
+        pr_number = pr.get("number")
+        installation_id = payload.get("installation", {}).get("id")
+        response = self.api_client.call_api(
+            method=HTTPMethod.POST,
+            path=APIEndpoints.REVIEW_PR.value,
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id,
+                  "re_review": True}
+        )
 
-    @staticmethod
-    def on_synchronize(owner, repo, pr_number):
-        # TODO call re-review for the PR changes
-        print(f"Pull request has been synced... Pr is being re-reviewed\n")
-        # review_service.review_pr(owner, repo, pr_number, re_review=True)
-
-    @staticmethod
-    def on_reopened(owner, repo, pr_number):
-        # TODO call AI review for the PR
-        print(f"Pull request has been reopened... Pr is being reviewed again...\n")
-        # review_service.review_pr(owner, repo, pr_number)
-
-    @staticmethod
-    def on_closed(owner, repo, pr_number, payload):
-        # TODO update repo embeddings with the new changes from the merged PR
+    def on_closed(self, payload):
+        owner = payload.get("repository", {}).get("owner", {}).get("login")
+        repo = payload.get("repository").get("name")
         if payload.get("pull_request", {}).get("merged"):
+            # TODO update repo embeddings with the new changes from the merged PR
             print(f"Pull request has been merged... Updating repo embeddings....\n")
-            # embedding_service.update_repo_embeddings(owner, repo)
+            self.embedding_service.update_repo_embeddings(owner, repo)
