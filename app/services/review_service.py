@@ -34,6 +34,7 @@ class ReviewService(object):
 
     def review_pr(self, owner, repo, pr_number):
         pr_diff = self.get_pr_diff(owner, repo, pr_number)
+        print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
         response = self.chain.invoke(
             {"pr_diff": pr_diff}
         )
