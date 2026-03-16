@@ -1,17 +1,17 @@
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, status
 
-from app.utils.constants import Routes
+from app.utils.constants import APIEndpoints
 from app.utils.security_util import verify_github_webhook
-from app.webhook.event_handlers.dispatcher import WebhookEventDispatcher
+from app.webhook.event_dispatcher import WebhookEventDispatcher
 
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post(Routes.GITHUB_WEBHOOK)
+@router.post(APIEndpoints.GITHUB_WEBHOOK, tags=["webhook"], status_code=status.HTTP_204_NO_CONTENT)
 async def github_webhook(request: Request):
     body = await request.body()
     payload = await request.json()

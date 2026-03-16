@@ -24,13 +24,18 @@ class HTTPMethod(str, Enum):
     DELETE = "DELETE"
 
 
-class Routes(str, Enum):
-    GITHUB_WEBHOOK = '/github-webhook'
+class GitHubRoutes(str, Enum):
     INSTALLATION_ACCESS_TOKEN = "/app/installations/{installation_id}/access_tokens"
     GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}"
     GET_PR_FILES = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
     GET_FILE_CONTENT = "/repos/{owner}/{repo}/contents/{path}"
     POST_COMMENT = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
+
+
+class APIEndpoints(str, Enum):
+    GITHUB_WEBHOOK = '/github-webhook'
+    REVIEW_PR = "/review-pr"
+
 
 
 class BaseUrls(str, Enum):

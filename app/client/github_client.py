@@ -4,7 +4,7 @@ import requests
 import logging
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from app.utils.constants import BaseUrls, Routes, HTTPMethod
+from app.utils.constants import BaseUrls, GitHubRoutes, HTTPMethod
 from app.utils.jwt_generator import generate_jwt
 
 
@@ -63,7 +63,7 @@ class GitHubClient(object):
     # TODO set installation token in the cache for expiration and regenerate if expired
     def get_installation_access_token(self) -> str:
         try:
-            path = Routes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
+            path = GitHubRoutes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
             headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {generate_jwt()}"}
             result = self.call_api(HTTPMethod.POST, path, headers=headers)
             status = result.get("status_code")
