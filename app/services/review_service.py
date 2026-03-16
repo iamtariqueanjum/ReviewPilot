@@ -1,7 +1,7 @@
 import logging
 
 from app.llm.llm_factory import LLMFactory
-from app.prompts.review_prompt import review_prompt
+from app.prompts.review_pr.final_prompt import prompt
 from app.services.github_service import GithubService
 
 
@@ -14,11 +14,28 @@ class ReviewService(object):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
         self.llm = LLMFactory.get_llm(provider)
-        self.chain = review_prompt | self.llm
+        self.chain = prompt | self.llm
+
+
+    def get_pr_diff(self, owner, repo, pr_number):
+        try:
+            files = self.github_service.get_pr_files(owner, repo, pr_number)
+            diff = ""
+            for file in files:
+                filename = file.get("filename")
+                patch = file.get("patch")
+                status = file.get("status")
+                diff += f"File: {filename}\nStatus: {status}\nPatch:\n{patch}\n\n"
+            return diff
+        except Exception as e:
+            logging.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
+            raise ValueError(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}: {str(e)}")
+
 
     def review_pr(self, owner, repo, pr_number):
-        print(f"Reviewing PR {owner}/{repo}#{pr_number}...\n")
-
-        # TODO call GitHub API to fetch PR details and files changed in the PR using the GithubService
-        # TODO call AI review module to review the PR and get the review comments/suggestions
+        pr_diff = self.get_pr_diff(owner, repo, pr_number)
+        response = self.chain.invoke(
+            {"pr_diff": pr_diff}
+        )
+        print(f"LLM response for PR review:\n{response}\n")
         # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
