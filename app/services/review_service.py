@@ -1,5 +1,6 @@
 from app.services.github_service import GithubService
 from app.llm.llm_factory import LLMFactory
+from app.prompts.review_prompt import review_prompt
 
 
 class ReviewService(object):
@@ -8,8 +9,7 @@ class ReviewService(object):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
         self.llm = LLMFactory.get_llm(provider)
-
-
+        self.chain = review_prompt | self.llm
 
     def review_pr(self, owner, repo, pr_number):
         print(f"Reviewing PR {owner}/{repo}#{pr_number}...\n")

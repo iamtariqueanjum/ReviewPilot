@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, status
 
 from app.models.review_request import ReviewRequest
+from app.services.review_service import ReviewService
 from app.utils.constants import APIEndpoints
 
 
@@ -17,11 +18,11 @@ async def review(request: ReviewRequest):
     print(f"Received review event\n")
     print(f"Payload: {payload}\n")
     print(f"Body: {body}\n")
-    # review_service.review_pr(
-    #     owner=request.owner,
-    #     repo=request.repo,
-    #     pr_number=request.pr_number
-    # )
+
+    # TODO move to ASYNC flow
+    ReviewService(installation_id=request.installation_id).review_pr(
+        owner=request.owner, repo=request.repo, pr_number=request.pr_number
+    )
     review_id = "12345" # TODO generate a unique review ID for the review request
 
     return {"review_id": review_id, "message": "Review triggered successfully", "status": "queued"}
