@@ -2,8 +2,8 @@ import base64
 import logging
 
 
-from app.client.github_client import GitHubClient
-from app.utils.constants import Routes, HTTPMethod
+from app.clients.github_client import GitHubClient
+from app.utils.constants import GitHubRoutes, HTTPMethod
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class GithubService(object):
         :return:
         """
         try:
-            path = Routes.GET_PR.value.format(owner=owner, repo=repo, pull_number=pr_number)
+            path = GitHubRoutes.GET_PR.value.format(owner=owner, repo=repo, pull_number=pr_number)
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
@@ -45,7 +45,7 @@ class GithubService(object):
         :return:
         """
         try:
-            path = Routes.GET_PR_FILES.value.format(owner=owner, repo=repo, pull_number=pr_number)
+            path = GitHubRoutes.GET_PR_FILES.value.format(owner=owner, repo=repo, pull_number=pr_number)
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
@@ -74,7 +74,7 @@ class GithubService(object):
         :return:
         """
         try:
-            path = Routes.GET_FILE_CONTENT.value.format(owner=owner, repo=repo, path=path)
+            path = GitHubRoutes.GET_FILE_CONTENT.value.format(owner=owner, repo=repo, path=path)
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
@@ -91,7 +91,7 @@ class GithubService(object):
 
     def post_comment(self, owner, repo, issue_number, comment):
         try:
-            path = Routes.POST_COMMENT.value.format(owner=owner, repo=repo, issue_number=issue_number)
+            path = GitHubRoutes.POST_COMMENT.value.format(owner=owner, repo=repo, issue_number=issue_number)
             result = self.client.call_api(HTTPMethod.POST, path, json={"body": comment})
             status = result.get("status_code")
             body = result.get("body")
