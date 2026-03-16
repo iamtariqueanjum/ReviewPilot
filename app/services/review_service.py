@@ -1,7 +1,7 @@
 import logging
 
 from app.llm.llm_factory import LLMFactory
-from app.prompts.review_pr.final_prompt import prompt
+from app.prompts.review_pr.final_prompt import prompt, parser
 from app.services.github_service import GithubService
 
 
@@ -14,8 +14,7 @@ class ReviewService(object):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
         self.llm = LLMFactory.get_llm(provider)
-        self.chain = prompt | self.llm
-
+        self.chain = prompt | self.llm | parser
 
     def get_pr_diff(self, owner, repo, pr_number):
         try:
