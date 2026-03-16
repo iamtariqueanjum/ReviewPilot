@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 
 from app.utils.constants import Routes
 from app.utils.security_util import verify_github_webhook
-from app.event_handlers.webhook_event_dispatch import WebhookEventDispatcher
+from app.webhook.event_handlers.dispatcher import WebhookEventDispatcher
 
 
 router = APIRouter()
