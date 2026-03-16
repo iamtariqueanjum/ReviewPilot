@@ -2,7 +2,7 @@ import base64
 import logging
 
 
-from app.client.github_client import GitHubClient
+from app.clients.github_client import GitHubClient
 from app.utils.constants import GitHubRoutes, HTTPMethod
 
 logger = logging.getLogger(__name__)

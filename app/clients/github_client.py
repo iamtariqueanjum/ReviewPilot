@@ -5,7 +5,7 @@ import logging
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from app.utils.constants import BaseUrls, GitHubRoutes, HTTPMethod
-from app.utils.jwt_generator import generate_jwt
+from app.utils.github_auth import generate_jwt
 
 
 logger = logging.getLogger(__name__)
