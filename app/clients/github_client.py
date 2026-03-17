@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class GitHubClient(object):
 
-    def __init__(self, installation_id, retries=3, timeout=10):
+    def __init__(self, installation_id, retries=3, timeout=60):
         self.installation_id = installation_id
         self.base_url = BaseUrls.GITHUB_API.value
         self.session = requests.Session()
@@ -33,7 +33,7 @@ class GitHubClient(object):
             "Authorization": f"Bearer {self.get_installation_access_token()}"
         }
 
-    def request(self, method, path, params=None, json=None, data=None, timeout=10, headers=None):
+    def request(self, method, path, params=None, json=None, data=None, timeout=60, headers=None):
         url = f"{self.base_url}{path}"
         resp = self.session.request(
             method=method.upper(),
