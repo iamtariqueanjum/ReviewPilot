@@ -2,6 +2,8 @@ import requests
 import logging
 
 from requests.adapters import HTTPAdapter
+from requests.exceptions import HTTPError
+
 from urllib3.util.retry import Retry
 from app.utils.constants import BaseUrls
 
@@ -39,7 +41,6 @@ class APIClient(object):
             headers=headers or self.headers,
             timeout=timeout
         )
-        resp.raise_for_status()
         return resp
 
     def call_api(self, method, path, **kwargs):
@@ -51,7 +52,13 @@ class APIClient(object):
                 response["body"] = resp.json()
             except ValueError:
                 response["body"] = resp.text
-        except Exception as err:
+        except HTTPError as err:
             logger.exception(f"Error while calling API : {str(err)}: {method} {path}")
+            resp = getattr(err, 'response', None)
+            if resp is not None:
+                try:
+                    response = {"status_code": resp.status_code, "body": resp.json()}
+                except Exception as e:
+                    response = {"status_code": resp.status_code, "body": getattr(resp, 'text', None)}
         print(f"API call: {method} {path} response: {response}")
         return response
