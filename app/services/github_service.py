@@ -109,13 +109,14 @@ class GithubService(object):
             body = result.get("body")
 
             if status and 200 <= status < 300:
+                print(f"Successfully posted comment for {owner}/{repo}#{issue_number}: {comment}")
+                print(f"GitHub response: status={status} body={body}")
                 return body
             # TODO check logs
             logger.error("Failed to post comment for %s/%s#%s: status=%s body=%s",
                          owner, repo, issue_number, status, body)
             print(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status} body={body}")
             raise ValueError(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status}")
-
         except Exception:
             # TODO check logs
             logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)

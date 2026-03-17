@@ -35,7 +35,7 @@ class GitHubRoutes(str, Enum):
 class APIEndpoints(str, Enum):
     GITHUB_WEBHOOK = '/github-webhook'
     REVIEW_PR = "/review-pr"
-
+    POST_COMMENT = "/post-comment"
 
 
 class BaseUrls(str, Enum):

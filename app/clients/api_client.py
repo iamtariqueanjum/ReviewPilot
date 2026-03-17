@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class APIClient(object):
 
-    def __init__(self, retries=3, timeout=10):
+    def __init__(self, retries=3, timeout=60):
         self.base_url = BaseUrls.INTERNAL_API.value
         self.session = requests.Session()
         self.retry_strategy = Retry(
@@ -30,7 +30,7 @@ class APIClient(object):
         }
 
 
-    def request(self, method, path, params=None, json=None, data=None, timeout=10, headers=None):
+    def request(self, method, path, params=None, json=None, data=None, timeout=60, headers=None):
         url = f"{self.base_url}{path}"
         resp = self.session.request(
             method=method.upper(),

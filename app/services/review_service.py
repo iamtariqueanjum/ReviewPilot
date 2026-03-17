@@ -3,9 +3,9 @@ import re
 
 from app.api.models.review_response import ReviewLLMResponse
 from app.llm.llm_factory import LLMFactory
+from app.utils.pr_comment_util import get_markdown_review_comment
 from app.prompts.review_pr.final_prompt import prompt
 from app.services.github_service import GithubService
-
 
 logging = logging.getLogger(__name__)
 
@@ -24,12 +24,14 @@ class ReviewService(object):
         pr_diff = self.get_pr_diff(owner, repo, pr_number, head_sha)
         print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
         # TODO exception handling
-        response = self.chain.invoke(
+        llm_response = self.chain.invoke(
             {"pr_diff": pr_diff}
         )
-        print(f"LLM response for PR review:\n{response}\n")
-
+        print(f"LLM response for PR review:\n{llm_response}\n")
+        body = get_markdown_review_comment(llm_response)
+        print(f"Generated review comment for {owner}/{repo}#{pr_number}:\n{body}\n")
         # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
+        self.github_service.post_comment(owner, repo, pr_number, body)
 
     def get_pr_diff(self, owner, repo, pr_number, head_sha):
         try:
@@ -92,15 +94,11 @@ class ReviewService(object):
     def get_new_file_line_number(file_lines, target, approx_line):
         n = len(file_lines)
         target = target.strip()
-
         approx_line = min(max(approx_line, 1), len(file_lines))
-
         for i in range(approx_line - 1, n):
             if file_lines[i].strip() == target:
                 return i + 1
-
         for i in range(approx_line - 2, -1, -1):
             if file_lines[i].strip() == target:
                 return i + 1
-
         return approx_line
