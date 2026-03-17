@@ -12,12 +12,9 @@ logger = logging.getLogger(__name__)
 
 @router.post(APIEndpoints.REVIEW_PR, tags=["review"], status_code=status.HTTP_204_NO_CONTENT)
 async def review(request: ReviewRequest):
-    body = await request.body()
-    payload = await request.json()
 
     print(f"Received review event\n")
-    print(f"Payload: {payload}\n")
-    print(f"Body: {body}\n")
+    print(f"Body: {request}\n")
 
     # TODO move to ASYNC flow
     ReviewService(installation_id=request.installation_id).review_pr(

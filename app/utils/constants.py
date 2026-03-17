@@ -40,4 +40,4 @@ class APIEndpoints(str, Enum):
 
 class BaseUrls(str, Enum):
     GITHUB_API = "https://api.github.com"
-    INTERNAL_API = "https://localhost:8000"
+    INTERNAL_API = "https://untyrannised-unfoamed-meryl.ngrok-free.dev"
