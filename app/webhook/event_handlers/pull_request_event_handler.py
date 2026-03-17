@@ -10,7 +10,7 @@ class PullRequestEventHandler(object):
 
     def handle(self, payload):
         action = payload.get("action")
-
+        print(f"Handling pull request event with action: {action}\n")
         if action == GitHubWHAction.OPENED:
             self.on_opened(payload)
         elif action == GitHubWHAction.SYNCHRONIZE:
@@ -25,11 +25,13 @@ class PullRequestEventHandler(object):
         repo = payload.get("repository").get("name")
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
+        head_sha = pr.get("head", {}).get("sha")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
             path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id}
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
+                  "installation_id": installation_id}
         )
 
     def on_synchronize(self, payload):
@@ -37,12 +39,13 @@ class PullRequestEventHandler(object):
         repo = payload.get("repository").get("name")
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
+        head_sha = pr.get("head", {}).get("sha")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
             path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id,
-                  "re_review": True}
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
+                  "installation_id": installation_id, "re_review": True}
         )
 
     def on_reopened(self, payload):
@@ -50,12 +53,13 @@ class PullRequestEventHandler(object):
         repo = payload.get("repository").get("name")
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
+        head_sha = pr.get("head", {}).get("sha")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
             path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "installation_id": installation_id,
-                  "re_review": True}
+            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
+                  "installation_id": installation_id, "re_review": True}
         )
 
     def on_closed(self, payload):

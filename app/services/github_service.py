@@ -1,7 +1,6 @@
 import base64
 import logging
 
-
 from app.clients.github_client import GitHubClient
 from app.utils.constants import GitHubRoutes, HTTPMethod
 
@@ -70,21 +69,23 @@ class GithubService(object):
             logger.exception("Error while fetching PR file details for %s/%s#%s", owner, repo, pr_number)
             raise
 
-    def get_file_content(self, owner, repo, path):
+    def get_file_content(self, owner, repo, path, head_sha=None):
         """
         :param owner:
         :param repo:
         :param path: file_path example: src/app/main.py
+        :param head_sha:
         :return:
         """
         try:
-            path = GitHubRoutes.GET_FILE_CONTENT.value.format(owner=owner, repo=repo, path=path)
+            path = GitHubRoutes.GET_FILE_CONTENT.value.format(owner=owner, repo=repo, path=path, head_sha=head_sha)
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
 
             if status and 200 <= status < 300:
                 return base64.b64decode(body.get("content", "")).decode("utf-8")
+
             # TODO check logs
             logger.error("Failed to fetch PR file content for %s/%s#%s: status=%s body=%s",
                          owner, repo, path, status, body)
@@ -92,7 +93,7 @@ class GithubService(object):
 
         except Exception:
             # TODO check logs
-            logger.exception("Error while fetching PR file content for %s/%s#%s", owner, repo, pr_number)
+            logger.exception("Error while fetching PR file content for %s/%s#%s", owner, repo, path)
             raise
 
     def post_comment(self, owner, repo, issue_number, comment):
