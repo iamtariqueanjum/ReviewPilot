@@ -1,7 +1,8 @@
 import logging
 
 from app.llm.llm_factory import LLMFactory
-from app.prompts.review_pr.final_prompt import prompt, parser
+from app.models.review_response import ReviewLLMResponse
+from app.prompts.review_pr.final_prompt import prompt
 from app.services.github_service import GithubService
 
 
@@ -14,7 +15,8 @@ class ReviewService(object):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
         self.llm = LLMFactory.get_llm(provider)
-        self.chain = prompt | self.llm | parser
+        self.structured_llm = self.llm.with_structured_output(ReviewLLMResponse)
+        self.chain = prompt | self.structured_llm
 
     def get_pr_diff(self, owner, repo, pr_number):
         try:
@@ -32,8 +34,10 @@ class ReviewService(object):
 
 
     def review_pr(self, owner, repo, pr_number):
+        # TODO exception handling
         pr_diff = self.get_pr_diff(owner, repo, pr_number)
         print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
+        # TODO exception handling
         response = self.chain.invoke(
             {"pr_diff": pr_diff}
         )
