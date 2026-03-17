@@ -19,12 +19,25 @@ class ReviewService(object):
         self.structured_llm = self.llm.with_structured_output(ReviewLLMResponse)
         self.chain = prompt | self.structured_llm
 
+    def review_pr(self, owner, repo, pr_number, head_sha):
+        # TODO exception handling
+        pr_diff = self.get_pr_diff(owner, repo, pr_number, head_sha)
+        print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
+        # TODO exception handling
+        response = self.chain.invoke(
+            {"pr_diff": pr_diff}
+        )
+        print(f"LLM response for PR review:\n{response}\n")
+
+        # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
+
     def get_pr_diff(self, owner, repo, pr_number, head_sha):
         try:
             files = self.github_service.get_pr_files(owner, repo, pr_number)
             diff = ""
             for file in files:
                 file_path = file.get("filename")
+                status = file.get("status")
                 patch = file.get("patch")
                 if not patch:
                     continue
@@ -37,24 +50,12 @@ class ReviewService(object):
                     approx_line = line.get("line")
                     target = line.get("content")
                     line["line"] = self.get_new_file_line_number(file_lines, target, approx_line)
-                status = file.get("status")
+                changed_lines = self.prepare_changed_lines_text(changed_lines)
                 diff += f"File: {file_path}\nStatus: {status}\nChanged lines:\n{changed_lines}\n\n"
             return diff
         except Exception as e:
             logging.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
             raise ValueError(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}: {str(e)}")
-
-
-    def review_pr(self, owner, repo, pr_number, head_sha):
-        # TODO exception handling
-        pr_diff = self.get_pr_diff(owner, repo, pr_number, head_sha)
-        print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
-        # TODO exception handling
-        response = self.chain.invoke(
-            {"pr_diff": pr_diff}
-        )
-        print(f"LLM response for PR review:\n{response}\n")
-        # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
 
     @staticmethod
     def parse_new_lines(patch):
@@ -79,6 +80,13 @@ class ReviewService(object):
             else:
                 new_line += 1
         return changes
+
+    @staticmethod
+    def prepare_changed_lines_text(changed_lines):
+        text = ""
+        for line in changed_lines:
+            text += f"{line.get('line')}: {line.get('content')}\n"
+        return text
 
     @staticmethod
     def get_new_file_line_number(file_lines, target, approx_line):
