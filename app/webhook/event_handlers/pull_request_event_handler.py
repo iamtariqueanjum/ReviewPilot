@@ -34,6 +34,7 @@ class PullRequestEventHandler(object):
             json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
                   "installation_id": installation_id}
         )
+        print(f"API Call made - Review response: {response}\n")
 
     def on_synchronize(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
@@ -49,6 +50,7 @@ class PullRequestEventHandler(object):
             json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
                   "installation_id": installation_id, "re_review": True}
         )
+        print(f"API Call made - Review response: {response}\n")
 
     def on_reopened(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
@@ -64,6 +66,7 @@ class PullRequestEventHandler(object):
             json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
                   "installation_id": installation_id, "re_review": True}
         )
+        print(f"API Call made - Review response: {response}\n")
 
     def on_closed(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
