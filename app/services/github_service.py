@@ -86,6 +86,11 @@ class GithubService(object):
             if status and 200 <= status < 300:
                 return base64.b64decode(body.get("content", "")).decode("utf-8")
 
+            if status and status == 404:
+                logger.warning("File content not found for %s/%s#%s: status=%s body=%s",
+                               owner, repo, path, status, body)
+                return ""
+
             # TODO check logs
             logger.error("Failed to fetch PR file content for %s/%s#%s: status=%s body=%s",
                          owner, repo, path, status, body)

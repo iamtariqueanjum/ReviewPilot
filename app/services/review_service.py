@@ -29,6 +29,7 @@ class ReviewService(object):
                 if not patch:
                     continue
                 changed_lines = self.parse_new_lines(patch)
+                # TODO too many api calls if there are many files
                 file_lines = self.github_service.get_file_content(owner, repo, file_path, head_sha).split('\n')
                 if not file_lines:
                     continue
@@ -49,10 +50,10 @@ class ReviewService(object):
         pr_diff = self.get_pr_diff(owner, repo, pr_number, head_sha)
         print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
         # TODO exception handling
-        # response = self.chain.invoke(
-        #     {"pr_diff": pr_diff}
-        # )
-        # print(f"LLM response for PR review:\n{response}\n")
+        response = self.chain.invoke(
+            {"pr_diff": pr_diff}
+        )
+        print(f"LLM response for PR review:\n{response}\n")
         # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
 
     @staticmethod
@@ -83,6 +84,8 @@ class ReviewService(object):
     def get_new_file_line_number(file_lines, target, approx_line):
         n = len(file_lines)
         target = target.strip()
+
+        approx_line = min(max(approx_line, 1), len(file_lines))
 
         for i in range(approx_line - 1, n):
             if file_lines[i].strip() == target:
