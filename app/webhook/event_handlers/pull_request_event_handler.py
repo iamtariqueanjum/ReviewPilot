@@ -26,6 +26,7 @@ class PullRequestEventHandler(object):
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
         head_sha = pr.get("head", {}).get("sha")
+        print(f"Open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
@@ -40,6 +41,7 @@ class PullRequestEventHandler(object):
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
         head_sha = pr.get("head", {}).get("sha")
+        print(f"Synchronize event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
@@ -54,6 +56,7 @@ class PullRequestEventHandler(object):
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
         head_sha = pr.get("head", {}).get("sha")
+        print(f"Re-open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
