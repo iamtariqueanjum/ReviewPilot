@@ -1,7 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.api.models.review_request import ReviewRequest
-from app.core.logger import logger
+from app.core.api.models.review_request import ReviewRequest
 from app.services.review_service import ReviewService
 from app.utils.constants import APIEndpoints
 

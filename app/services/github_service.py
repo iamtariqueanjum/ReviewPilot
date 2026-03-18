@@ -1,7 +1,7 @@
 import base64
 
 from app.core.logger import logger
-from app.clients.github_client import GitHubClient
+from app.integrations.github.client import GitHubClient
 from app.utils.constants import GitHubRoutes, HTTPMethod
 
 

@@ -1,4 +1,4 @@
-from app.clients.api_client import APIClient
+from app.core.api.client import APIClient
 from app.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod
 
 
