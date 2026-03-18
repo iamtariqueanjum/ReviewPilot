@@ -1,14 +1,13 @@
-import logging
-
 from fastapi import APIRouter, status
 
 from app.api.models.review_request import ReviewRequest
+from app.core.logger import logger
 from app.services.review_service import ReviewService
 from app.utils.constants import APIEndpoints
 
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
+
 
 @router.post(APIEndpoints.REVIEW_PR, tags=["review"], status_code=status.HTTP_204_NO_CONTENT)
 async def review(request: ReviewRequest):

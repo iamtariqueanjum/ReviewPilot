@@ -8,8 +8,7 @@ from urllib3.util.retry import Retry
 from app.utils.constants import ConfigConstants, GitHubRoutes, HTTPMethod
 from app.utils.github_auth import generate_jwt
 
-import logging
-logger = logging.getLogger(__name__)
+from app.core.logger import logger
 
 
 class GitHubClient(object):

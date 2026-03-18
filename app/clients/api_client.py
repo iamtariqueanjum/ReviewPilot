@@ -1,13 +1,11 @@
 import requests
-import logging
 
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
 
 from urllib3.util.retry import Retry
+from app.core.logger import logger
 from app.utils.constants import ConfigConstants
-
-logger = logging.getLogger(__name__)
 
 
 class APIClient(object):

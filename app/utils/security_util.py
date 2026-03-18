@@ -2,12 +2,9 @@ from __future__ import annotations
 
 import hmac
 import hashlib
-import logging
 
+from app.core.logger import logger
 from app.utils.constants import ConfigConstants
-
-
-logger = logging.getLogger(__name__)
 
 
 def verify_github_webhook(payload_body: bytes, signature: str) -> bool:

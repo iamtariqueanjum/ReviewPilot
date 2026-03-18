@@ -1,14 +1,12 @@
-import logging
-
 from fastapi import APIRouter, Request, status
 
+from app.core.logger import logger
 from app.utils.constants import APIEndpoints
 from app.utils.security_util import verify_github_webhook
 from app.webhook.event_dispatcher import WebhookEventDispatcher
 
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 
 @router.post(APIEndpoints.GITHUB_WEBHOOK, tags=["webhook"], status_code=status.HTTP_204_NO_CONTENT)

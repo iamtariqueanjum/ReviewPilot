@@ -2,12 +2,9 @@ from __future__ import annotations
 
 import time
 import jwt
-import logging
 
+from app.core.logger import logger
 from app.utils.constants import ConfigConstants
-
-
-logger = logging.getLogger(__name__)
 
 
 def generate_jwt() -> str:

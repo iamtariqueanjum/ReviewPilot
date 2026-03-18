@@ -1,13 +1,11 @@
-import logging
 import re
 
 from app.api.models.review_response import ReviewLLMResponse
+from app.core.logger import logger
 from app.llm.llm_factory import LLMFactory
 from app.utils.pr_comment_util import get_markdown_review_comment
 from app.prompts.review_pr.final_prompt import prompt
 from app.services.github_service import GithubService
-
-logging = logging.getLogger(__name__)
 
 
 class ReviewService(object):

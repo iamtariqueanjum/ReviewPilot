@@ -1,6 +1,6 @@
 from enum import Enum
 
-from app.config.provider import get_config
+from app.core.config.provider import get_config
 settings = get_config()
 
 
