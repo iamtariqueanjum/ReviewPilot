@@ -15,7 +15,7 @@ async def review(request: ReviewRequest):
 
     print(f"Received review event\n")
     print(f"Body: {request}\n")
-
+    # TODO handle re review requests by checking if "re_review" is True in the request
     # TODO move to ASYNC flow
     ReviewService(installation_id=request.installation_id).review_pr(
         owner=request.owner, repo=request.repo, pr_number=request.pr_number, head_sha=request.head_sha
