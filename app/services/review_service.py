@@ -1,9 +1,9 @@
 import re
 
 from app.core.api.models.review_response import ReviewLLMResponse
-from app.llm.llm_factory import LLMFactory
+from app.integrations.llm.llm_factory import LLMFactory
 from app.utils.pr_comment_util import get_markdown_review_comment
-from app.prompts.review_pr.final_prompt import prompt
+from app.integrations.llm.prompts.review_pr.final_prompt import prompt
 from app.services.github_service import GithubService
 
 
