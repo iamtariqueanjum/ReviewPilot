@@ -5,7 +5,7 @@ from requests.exceptions import HTTPError
 
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from app.utils.constants import BaseUrls, GitHubRoutes, HTTPMethod
+from app.utils.constants import ConfigConstants, GitHubRoutes, HTTPMethod
 from app.utils.github_auth import generate_jwt
 
 import logging
@@ -16,7 +16,7 @@ class GitHubClient(object):
 
     def __init__(self, installation_id, retries=3, timeout=60):
         self.installation_id = installation_id
-        self.base_url = BaseUrls.GITHUB_API.value
+        self.base_url = ConfigConstants.GITHUB_API.value
         self.session = requests.Session()
         self.retry_strategy = Retry(
             total=retries,

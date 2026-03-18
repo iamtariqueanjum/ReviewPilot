@@ -1,13 +1,8 @@
-from app.utils.llm_constants import LLMProvider
-
-from app.config.settings import get_settings
-
 from langchain_openai import ChatOpenAI
 # TODO fix later
 # from langchain_google_genai import ChatGoogleGenerativeAI
 
-
-settings = get_settings()
+from app.utils.constants import ConfigConstants, LLMProvider
 
 
 class LLMFactory(object):
@@ -15,11 +10,11 @@ class LLMFactory(object):
     @staticmethod
     def get_llm(provider: str):
 
-        provider = provider or settings.DEFAULT_LLM_PROVIDER
+        provider = provider or ConfigConstants.DEFAULT_LLM_PROVIDER
 
         if provider == LLMProvider.OPENAI:
-            return ChatOpenAI(model=settings.OPENAI_BASE_MODEL, api_key=settings.OPENAI_API_KEY)
+            return ChatOpenAI(model=ConfigConstants.OPENAI_BASE_MODEL)
         # elif provider == LLMProvider.GOOGLE:
-        #     return ChatGoogleGenerativeAI(model=settings.GEMINI_BASE_MODEL, api_key=settings.GEMINI_API_KEY)
+            # return ChatGoogleGenerativeAI(model=ConfigConstants.GEMINI_BASE_MODEL, api_key=ConfigConstants.GEMINI_API_KEY)
 
         raise ValueError(f"Unsupported LLM provider: {provider}")

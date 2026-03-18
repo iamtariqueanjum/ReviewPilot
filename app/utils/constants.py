@@ -1,5 +1,8 @@
 from enum import Enum
 
+from app.config.provider import get_config
+settings = get_config()
+
 
 class GitHubWHAction(str, Enum):
     CREATED = "created"
@@ -15,6 +18,13 @@ class GitHubWHEvent(str, Enum):
     PULL_REQUEST = "pull_request"
     ISSUE_COMMENT = "issue_comment"
     PUSH = "push"
+
+
+class LLMProvider(str, Enum):
+    OPENAI = "openai"
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    CUSTOM = "custom"
 
 
 class HTTPMethod(str, Enum):
@@ -38,6 +48,18 @@ class APIEndpoints(str, Enum):
     POST_COMMENT = "/post-comment"
 
 
-class BaseUrls(str, Enum):
-    GITHUB_API = "https://api.github.com"
-    INTERNAL_API = "https://untyrannised-unfoamed-meryl.ngrok-free.dev"
+class ConfigConstants(str, Enum):
+    # LLM-related
+    DEFAULT_LLM_PROVIDER = settings.DEFAULT_LLM_PROVIDER
+    OPENAI_BASE_MODEL = settings.OPENAI_BASE_MODEL
+    GEMINI_BASE_MODEL = settings.GEMINI_BASE_MODEL
+    GEMINI_API_KEY = settings.GEMINI_API_KEY
+
+    # GitHub-related
+    GITHUB_APP_ID = settings.GITHUB_APP_ID
+    GITHUB_PRIVATE_KEY_PATH = settings.GITHUB_PRIVATE_KEY_PATH
+    GITHUB_WEBHOOK_SECRET = settings.GITHUB_WEBHOOK_SECRET
+
+    # App-related
+    GITHUB_API = settings.GITHUB_API
+    INTERNAL_API = settings.INTERNAL_API

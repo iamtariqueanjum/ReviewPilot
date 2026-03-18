@@ -5,7 +5,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
 
 from urllib3.util.retry import Retry
-from app.utils.constants import BaseUrls
+from app.utils.constants import ConfigConstants
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class APIClient(object):
 
     def __init__(self, retries=3, timeout=60):
-        self.base_url = BaseUrls.INTERNAL_API.value
+        self.base_url = ConfigConstants.INTERNAL_API.value
         self.session = requests.Session()
         self.retry_strategy = Retry(
             total=retries,

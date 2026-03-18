@@ -30,7 +30,6 @@ class ReviewService(object):
         print(f"LLM response for PR review:\n{llm_response}\n")
         body = get_markdown_review_comment(llm_response)
         print(f"Generated review comment for {owner}/{repo}#{pr_number}:\n{body}\n")
-        # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
         self.github_service.post_comment(owner, repo, pr_number, body)
 
     def get_pr_diff(self, owner, repo, pr_number, head_sha):

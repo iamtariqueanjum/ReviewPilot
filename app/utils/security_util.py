@@ -4,14 +4,14 @@ import hmac
 import hashlib
 import logging
 
-from app.config.settings import get_settings
-settings = get_settings()
+from app.utils.constants import ConfigConstants
+
 
 logger = logging.getLogger(__name__)
 
 
 def verify_github_webhook(payload_body: bytes, signature: str) -> bool:
-    secret = settings.GITHUB_WEBHOOK_SECRET
+    secret = ConfigConstants.GITHUB_WEBHOOK_SECRET
     if not secret:
         logger.warning("GITHUB_WEBHOOK_SECRET not set in environment variables")
         return False
