@@ -21,6 +21,8 @@ class ConfigSettings(BaseSettings):
     # App constants
     GITHUB_API: str = Field(..., env="GITHUB_API")
     INTERNAL_API: str = Field(..., env="INTERNAL_API")
+    CELERY_BROKER_URL: str = Field(..., env="CELERY_BROKER_URL")
+    CELERY_BACKEND_URL: str = Field(..., env="CELERY_BACKEND_URL")
 
     class Config:
         env_file = ".env"

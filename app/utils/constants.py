@@ -62,3 +62,5 @@ class ConfigConstants(str, Enum):
     # App-related
     GITHUB_API = settings.GITHUB_API
     INTERNAL_API = settings.INTERNAL_API
+    CELERY_BROKER_URL = settings.CELERY_BROKER_URL
+    CELERY_BACKEND_URL = settings.CELERY_BACKEND_URL
