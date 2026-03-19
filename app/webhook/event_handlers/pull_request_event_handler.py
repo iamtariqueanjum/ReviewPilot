@@ -49,6 +49,7 @@ class PullRequestEventHandler(object):
         #     json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
         #           "installation_id": installation_id}
         # )
+        return {"message": f"Review for PR {owner}/{repo}#{pr_number} has been queued", "status": "success"}
 
     def on_synchronize(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
