@@ -1,10 +1,11 @@
 import re
 
 from app.core.api.models.review_response import ReviewLLMResponse
+from app.core.logger import logger
 from app.integrations.llm.llm_factory import LLMFactory
-from app.utils.pr_comment_util import get_markdown_review_comment
+from app.core.utils.pr_comment_util import get_markdown_review_comment
 from app.integrations.llm.prompts.review_pr.final_prompt import prompt
-from app.services.github_service import GithubService
+from app.core.services.github_service import GithubService
 
 
 class ReviewService(object):
@@ -53,7 +54,7 @@ class ReviewService(object):
                 diff += f"File: {file_path}\nStatus: {status}\nChanged lines:\n{changed_lines}\n\n"
             return diff
         except Exception as e:
-            logging.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
+            logger.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
             raise ValueError(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}: {str(e)}")
 
     @staticmethod

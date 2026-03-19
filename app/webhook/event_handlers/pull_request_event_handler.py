@@ -1,5 +1,5 @@
 from app.core.api.client import APIClient
-from app.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod
+from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod
 
 
 class PullRequestEventHandler(object):

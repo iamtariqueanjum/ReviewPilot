@@ -5,7 +5,7 @@ from requests.exceptions import HTTPError
 
 from urllib3.util.retry import Retry
 from app.core.logger import logger
-from app.utils.constants import ConfigConstants
+from app.core.utils.constants import ConfigConstants
 
 
 class APIClient(object):

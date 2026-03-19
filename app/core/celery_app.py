@@ -1,6 +1,6 @@
 from celery import Celery
 
-from app.utils.constants import ConfigConstants
+from app.core.utils.constants import ConfigConstants
 
 celery_app = Celery(
     "review_pilot",

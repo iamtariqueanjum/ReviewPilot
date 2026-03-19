@@ -3,8 +3,7 @@ from __future__ import annotations
 import time
 import jwt
 
-from app.core.logger import logger
-from app.utils.constants import ConfigConstants
+from app.core.utils.constants import ConfigConstants
 
 
 def generate_jwt() -> str:

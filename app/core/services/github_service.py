@@ -2,7 +2,7 @@ import base64
 
 from app.core.logger import logger
 from app.integrations.github.client import GitHubClient
-from app.utils.constants import GitHubRoutes, HTTPMethod
+from app.core.utils.constants import GitHubRoutes, HTTPMethod
 
 
 class GithubService(object):

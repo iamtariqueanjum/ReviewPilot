@@ -4,7 +4,7 @@ import hmac
 import hashlib
 
 from app.core.logger import logger
-from app.utils.constants import ConfigConstants
+from app.core.utils.constants import ConfigConstants
 
 
 def verify_github_webhook(payload_body: bytes, signature: str) -> bool:

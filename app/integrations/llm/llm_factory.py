@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 # TODO fix later
 # from langchain_google_genai import ChatGoogleGenerativeAI
 
-from app.utils.constants import ConfigConstants, LLMProvider
+from app.core.utils.constants import ConfigConstants, LLMProvider
 
 
 class LLMFactory(object):

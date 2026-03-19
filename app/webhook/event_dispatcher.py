@@ -1,4 +1,4 @@
-from app.utils.constants import GitHubWHEvent
+from app.core.utils.constants import GitHubWHEvent
 
 from app.webhook.event_handlers.installation_event_handler import InstallationEventHandler
 from app.webhook.event_handlers.issue_comment_event_handler import IssueCommentEventHandler
