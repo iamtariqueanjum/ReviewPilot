@@ -21,19 +21,23 @@ class PullRequestEventHandler(object):
         elif action == GitHubWHAction.CLOSED:
             self.on_closed(payload)
 
-    def on_opened(self, payload):
+    @staticmethod
+    def validate_payload(payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")
         repo = payload.get("repository").get("name")
         pr = payload.get("pull_request", {})
         pr_number = pr.get("number")
         head_sha = pr.get("head", {}).get("sha")
-        print(f"Open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         installation_id = payload.get("installation", {}).get("id")
         REQUIRED_FIELDS = [owner, repo, pr_number, head_sha, installation_id]
         for field in REQUIRED_FIELDS:
             if not field:
                 print(f"Required field {field} not found in payload\n")
-                return {"error": f"Required field {field} not found in payload", "status": "error"}
+                return False, f"Required field {field} not found in payload" # TODO raise 400
+        return owner, repo, pr_number, head_sha, installation_id
+
+    def on_opened(self, payload):
+        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
         review_id = f"{repo}_{pr_number}_{head_sha}"
         review_pr.apply_async(
             task_id=review_id,
@@ -49,15 +53,11 @@ class PullRequestEventHandler(object):
         #     json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
         #           "installation_id": installation_id}
         # )
+        return {"message": f"Review for PR {owner}/{repo}#{pr_number} has been queued", "status": "success"}
 
     def on_synchronize(self, payload):
-        owner = payload.get("repository", {}).get("owner", {}).get("login")
-        repo = payload.get("repository").get("name")
-        pr = payload.get("pull_request", {})
-        pr_number = pr.get("number")
-        head_sha = pr.get("head", {}).get("sha")
+        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
         print(f"Synchronize event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
-        installation_id = payload.get("installation", {}).get("id")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
             path=APIEndpoints.REVIEW_PR.value,
@@ -67,20 +67,17 @@ class PullRequestEventHandler(object):
         print(f"API Call made - Review response: {response}\n")
 
     def on_reopened(self, payload):
-        owner = payload.get("repository", {}).get("owner", {}).get("login")
-        repo = payload.get("repository").get("name")
-        pr = payload.get("pull_request", {})
-        pr_number = pr.get("number")
-        head_sha = pr.get("head", {}).get("sha")
+        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
         print(f"Re-open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
-        installation_id = payload.get("installation", {}).get("id")
-        response = self.api_client.call_api(
-            method=HTTPMethod.POST,
-            path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
-                  "installation_id": installation_id, "re_review": True}
+        review_id = f"{repo}_{pr_number}_{head_sha}"
+        review_pr.apply_async(
+            task_id=review_id,
+            args=(installation_id, owner, repo, pr_number, head_sha),
+            countdown=10,
+            retry=True,
+            queue=QueueConstants.REVIEW_PR_QUEUE
         )
-        print(f"API Call made - Review response: {response}\n")
+        print(f"Review pushed to queue {review_id}\n")
 
     def on_closed(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")

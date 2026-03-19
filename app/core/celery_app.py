@@ -9,5 +9,7 @@ celery_app = Celery(
 )
 
 celery_app.conf.task_routes = {
-    "app.tasks.review_tasks.review_pr_task": {"queue": QueueConstants.REVIEW_PR_QUEUE},
+    "app.workers.review_worker.review_pr": {"queue": QueueConstants.REVIEW_PR_QUEUE},
 }
+celery_app.autodiscover_tasks(["app.workers"])
+import app.workers.review_worker
