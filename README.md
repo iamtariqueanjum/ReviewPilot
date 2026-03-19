@@ -120,5 +120,3 @@ docker ps
 ---
 
 ## 🏁 You're Good to Go!
-
-Start everything, hit your endpoints, and let Celery do the heavy lifting in the background 😎

@@ -1,6 +1,6 @@
 from celery import Celery
 
-from app.core.utils.constants import ConfigConstants
+from app.core.utils.constants import ConfigConstants, QueueConstants
 
 celery_app = Celery(
     "review_pilot",
@@ -9,5 +9,5 @@ celery_app = Celery(
 )
 
 celery_app.conf.task_routes = {
-    "app.tasks.review_tasks.review_pr_task": {"queue": "review_queue"},
+    "app.tasks.review_tasks.review_pr_task": {"queue": QueueConstants.REVIEW_PR_QUEUE},
 }

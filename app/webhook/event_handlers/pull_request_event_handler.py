@@ -1,5 +1,6 @@
 from app.core.api.client import APIClient
-from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod
+from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod, QueueConstants
+from app.workers.review_worker import review_pr
 
 
 class PullRequestEventHandler(object):
@@ -28,13 +29,26 @@ class PullRequestEventHandler(object):
         head_sha = pr.get("head", {}).get("sha")
         print(f"Open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         installation_id = payload.get("installation", {}).get("id")
-        response = self.api_client.call_api(
-            method=HTTPMethod.POST,
-            path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
-                  "installation_id": installation_id}
+        REQUIRED_FIELDS = [owner, repo, pr_number, head_sha, installation_id]
+        for field in REQUIRED_FIELDS:
+            if not field:
+                print(f"Required field {field} not found in payload\n")
+                return {"error": f"Required field {field} not found in payload", "status": "error"}
+        review_id = f"{repo}_{pr_number}_{head_sha}"
+        review_pr.apply_async(
+            task_id=review_id,
+            args=(installation_id, owner, repo, pr_number, head_sha),
+            countdown=10,
+            retry=True,
+            queue=QueueConstants.REVIEW_PR_QUEUE
         )
-        print(f"API Call made - Review response: {response}\n")
+        print(f"Review pushed to queue {review_id}\n")
+        # response = self.api_client.call_api(
+        #     method=HTTPMethod.POST,
+        #     path=APIEndpoints.REVIEW_PR.value,
+        #     json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
+        #           "installation_id": installation_id}
+        # )
 
     def on_synchronize(self, payload):
         owner = payload.get("repository", {}).get("owner", {}).get("login")

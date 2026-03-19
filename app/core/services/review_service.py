@@ -30,6 +30,7 @@ class ReviewService(object):
         print(f"Generated review comment for {owner}/{repo}#{pr_number}:\n{body}\n")
         # TODO move this api call to async flow and add exception handling
         self.github_service.post_comment(owner, repo, pr_number, body)
+        return {"message": "Review comment posted successfully", "status": "success"}
 
     def get_pr_diff(self, owner, repo, pr_number, head_sha):
         try:

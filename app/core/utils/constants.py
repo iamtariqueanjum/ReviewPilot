@@ -44,7 +44,7 @@ class GitHubRoutes(str, Enum):
 
 class APIEndpoints(str, Enum):
     GITHUB_WEBHOOK = '/github-webhook'
-    REVIEW_PR = "/review-pr"
+    REVIEW_PR = "/review-pr" # TODO remove this API call overhead
 
 
 class ConfigConstants(str, Enum):
@@ -64,3 +64,7 @@ class ConfigConstants(str, Enum):
     INTERNAL_API = settings.INTERNAL_API
     CELERY_BROKER_URL = settings.CELERY_BROKER_URL
     CELERY_BACKEND_URL = settings.CELERY_BACKEND_URL
+
+
+class QueueConstants(str, Enum):
+    REVIEW_PR_QUEUE = "review_pr_queue"

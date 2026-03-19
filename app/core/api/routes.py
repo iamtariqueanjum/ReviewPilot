@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Request, status
 
 from app.core.api.models.review_request import ReviewRequest
-from app.core.utils.constants import APIEndpoints
+from app.core.utils.constants import APIEndpoints, QueueConstants
 from app.core.utils.security_util import verify_github_webhook
-from app.core.services.review_service import ReviewService
 from app.webhook.event_dispatcher import WebhookEventDispatcher
+from app.workers.review_worker import review_pr
+
 
 router = APIRouter()
 
@@ -15,12 +16,14 @@ async def review(request: ReviewRequest):
     print(f"Received review event\n")
     print(f"Body: {request}\n")
     # TODO handle re review requests by checking if "re_review" is True in the request
-    # TODO move to ASYNC flow
-    ReviewService(installation_id=request.installation_id).review_pr(
-        owner=request.owner, repo=request.repo, pr_number=request.pr_number, head_sha=request.head_sha
+    review_id = f"{request.repo}_{request.pr_number}_{request.head_sha}"
+    review_pr.apply_async(
+        task_id=review_id,
+        args=(request.installation_id, request.owner, request.repo, request.pr_number, request.head_sha),
+        countdown=10,
+        retry=True,
+        queue=QueueConstants.REVIEW_PR_QUEUE
     )
-    review_id = "12345" # TODO generate a unique review ID for the review request
-
     return {"review_id": review_id, "message": "Review triggered successfully", "status": "queued"}
 
 
