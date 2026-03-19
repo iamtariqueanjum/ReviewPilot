@@ -2,18 +2,13 @@ from __future__ import annotations
 
 import time
 import jwt
-import logging
 
-from app.config.settings import get_settings
-settings = get_settings()
-
-
-logger = logging.getLogger(__name__)
+from app.core.utils.constants import ConfigConstants
 
 
 def generate_jwt() -> str:
-    GITHUB_APP_ID = settings.GITHUB_APP_ID
-    GITHUB_PRIVATE_KEY_PATH = settings.GITHUB_PRIVATE_KEY_PATH
+    GITHUB_APP_ID = ConfigConstants.GITHUB_APP_ID
+    GITHUB_PRIVATE_KEY_PATH = ConfigConstants.GITHUB_PRIVATE_KEY_PATH
 
     if not GITHUB_APP_ID or not GITHUB_PRIVATE_KEY_PATH:
         raise EnvironmentError("GITHUB_APP_ID and GITHUB_PRIVATE_KEY_PATH must be set in environment")

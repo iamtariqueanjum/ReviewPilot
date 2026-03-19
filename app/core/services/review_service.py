@@ -1,13 +1,11 @@
-import logging
 import re
 
-from app.api.models.review_response import ReviewLLMResponse
-from app.llm.llm_factory import LLMFactory
-from app.utils.pr_comment_util import get_markdown_review_comment
-from app.prompts.review_pr.final_prompt import prompt
-from app.services.github_service import GithubService
-
-logging = logging.getLogger(__name__)
+from app.core.api.models.review_response import ReviewLLMResponse
+from app.core.logger import logger
+from app.integrations.llm.llm_factory import LLMFactory
+from app.core.utils.pr_comment_util import get_markdown_review_comment
+from app.integrations.llm.prompts.review_pr.final_prompt import prompt
+from app.core.services.github_service import GithubService
 
 
 class ReviewService(object):
@@ -30,8 +28,9 @@ class ReviewService(object):
         print(f"LLM response for PR review:\n{llm_response}\n")
         body = get_markdown_review_comment(llm_response)
         print(f"Generated review comment for {owner}/{repo}#{pr_number}:\n{body}\n")
-        # TODO call GitHub API to post the review comments/suggestions on the PR using the GithubService
+        # TODO move this api call to async flow and add exception handling
         self.github_service.post_comment(owner, repo, pr_number, body)
+        return {"message": "Review comment posted successfully", "status": "success"}
 
     def get_pr_diff(self, owner, repo, pr_number, head_sha):
         try:
@@ -56,7 +55,7 @@ class ReviewService(object):
                 diff += f"File: {file_path}\nStatus: {status}\nChanged lines:\n{changed_lines}\n\n"
             return diff
         except Exception as e:
-            logging.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
+            logger.exception(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}")
             raise ValueError(f"Error while fetching PR diff for {owner}/{repo}#{pr_number}: {str(e)}")
 
     @staticmethod

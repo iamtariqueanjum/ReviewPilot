@@ -1,4 +1,4 @@
-from app.utils.constants import GitHubWHAction
+from app.core.utils.constants import GitHubWHAction
 
 
 class InstallationEventHandler(object):

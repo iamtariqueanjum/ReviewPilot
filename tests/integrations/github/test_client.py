@@ -1,6 +1,6 @@
 import logging
 
-from app.clients.github_client import GitHubClient
+from app.integrations.github.client import GitHubClient
 
 
 class DummyClient:

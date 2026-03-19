@@ -1,19 +1,21 @@
-import requests
-import logging
+from __future__ import annotations
 
-from requests.adapters import HTTPAdapter
+import requests
 from requests.exceptions import HTTPError
 
+from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from app.utils.constants import BaseUrls
+from app.core.utils.constants import ConfigConstants, GitHubRoutes, HTTPMethod
+from app.core.utils.github_auth import generate_jwt
 
-logger = logging.getLogger(__name__)
+from app.core.logger import logger
 
 
-class APIClient(object):
+class GitHubClient(object):
 
-    def __init__(self, retries=3, timeout=60):
-        self.base_url = BaseUrls.INTERNAL_API.value
+    def __init__(self, installation_id, retries=3, timeout=60):
+        self.installation_id = installation_id
+        self.base_url = ConfigConstants.GITHUB_API.value
         self.session = requests.Session()
         self.retry_strategy = Retry(
             total=retries,
@@ -26,9 +28,9 @@ class APIClient(object):
         self.session.mount("http://", self.adapter)
         self.session.mount("https://", self.adapter)
         self.headers = {
-            "Accept": "application/json",
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {self.get_installation_access_token()}"
         }
-
 
     def request(self, method, path, params=None, json=None, data=None, timeout=60, headers=None):
         url = f"{self.base_url}{path}"
@@ -62,3 +64,24 @@ class APIClient(object):
                     response = {"status_code": resp.status_code, "body": getattr(resp, 'text', None)}
         print(f"API call: {method} {path} response: {response}")
         return response
+
+    # TODO set installation token in the cache for expiration and regenerate if expired
+    def get_installation_access_token(self) -> str:
+        try:
+            path = GitHubRoutes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
+            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {generate_jwt()}"}
+            result = self.call_api(HTTPMethod.POST, path, headers=headers)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300 and isinstance(body, dict):
+                token = body.get("token")
+                if token:
+                    return token
+                raise ValueError("GitHub response did not contain an access token")
+
+            logger.error("Failed to fetch installation token: status=%s body=%s", status, body)
+            raise ValueError(f"Failed to fetch installation token: status={status}")
+        except Exception:
+            logger.exception("Error while requesting installation access token for %s", self.installation_id)
+            raise

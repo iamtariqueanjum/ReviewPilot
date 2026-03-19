@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 from pydantic import Field
 
 
-class Settings(BaseSettings):
+class ConfigSettings(BaseSettings):
     # GitHub App credentials
     GITHUB_APP_ID: str = Field(..., env="GITHUB_APP_ID")
     GITHUB_PRIVATE_KEY_PATH: str = Field(..., env="GITHUB_PRIVATE_KEY_PATH")
@@ -18,11 +18,16 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = Field(..., env="GEMINI_API_KEY")
     GEMINI_BASE_MODEL: str = Field(..., env="GEMINI_BASE_MODEL")
 
+    # App constants
+    GITHUB_API: str = Field(..., env="GITHUB_API")
+    INTERNAL_API: str = Field(..., env="INTERNAL_API")
+    CELERY_BROKER_URL: str = Field(..., env="CELERY_BROKER_URL")
+    CELERY_BACKEND_URL: str = Field(..., env="CELERY_BACKEND_URL")
 
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 @lru_cache
-def get_settings():
-    return Settings()
+def get_config():
+    return ConfigSettings()
