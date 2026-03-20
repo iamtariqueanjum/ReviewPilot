@@ -121,6 +121,7 @@ class GithubService(object):
             logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)
             raise
 
+    # TODO move owner, repo to class level attributes in class instantiations and remove from method params
     def get_repository(self, owner, repo):
         try:
             path = GitHubRoutes.GET_REPOSITORY.value.format(owner=owner, repo=repo)
@@ -140,4 +141,25 @@ class GithubService(object):
         except Exception:
             # TODO check logs
             logger.exception("Error while retrieving repo details for %s/%s", owner, repo)
+            raise
+
+    def get_branch(self, owner, repo, branch):
+        try:
+            path = GitHubRoutes.GET_BRANCH.value.format(owner=owner, repo=repo, branch=branch)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved branch details for {owner}/{repo}/{branch}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve branch details for %s/%s/%s: status=%s body=%s",
+                         owner, repo, branch, status, body)
+            print(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving branch details for %s/%s/%s", owner, repo, branch)
             raise

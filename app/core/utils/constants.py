@@ -41,6 +41,7 @@ class GitHubRoutes(str, Enum):
     GET_FILE_CONTENT = "/repos/{owner}/{repo}/contents/{path}?ref={head_sha}"
     POST_COMMENT = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
     GET_REPOSITORY = '/repos/{owner}/{repo}'
+    GET_BRANCH = '/repos/{owner}/{repo}/branches/{branch}'
 
 
 class APIEndpoints(str, Enum):
