@@ -43,6 +43,7 @@ class GitHubRoutes(str, Enum):
     GET_REPOSITORY = '/repos/{owner}/{repo}'
     GET_BRANCH = '/repos/{owner}/{repo}/branches/{branch}'
     GET_TREE_RECURSIVE = '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1'
+    GET_BLOB_CONTENT = '/repos/{owner}/{repo}/git/blobs/{file_sha}'
 
 
 class APIEndpoints(str, Enum):

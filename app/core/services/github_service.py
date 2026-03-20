@@ -184,3 +184,24 @@ class GithubService(object):
             # TODO check logs
             logger.exception("Error while retrieving tree details for %s/%s/%s", owner, repo, tree_sha)
             raise
+
+    def get_blob_content(self, owner, repo, file_sha):
+        try:
+            path = GitHubRoutes.GET_BLOB_CONTENT.value.format(owner=owner, repo=repo, file_sha=file_sha)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved blob content for {owner}/{repo}/{file_sha}")
+                print(f"GitHub response: status={status} body={body}")
+                return base64.b64decode(body.get("content", "")).decode("utf-8")
+            # TODO check logs
+            logger.error("Failed to retrieve blob content for %s/%s/%s: status=%s body=%s",
+                         owner, repo, file_sha, status, body)
+            print(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving blob content for %s/%s/%s", owner, repo, file_sha)
+            raise
