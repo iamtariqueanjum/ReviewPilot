@@ -29,15 +29,15 @@ class PullRequestEventHandler(object):
         pr_number = pr.get("number")
         head_sha = pr.get("head", {}).get("sha")
         installation_id = payload.get("installation", {}).get("id")
-        REQUIRED_FIELDS = [owner, repo, pr_number, head_sha, installation_id]
+        REQUIRED_FIELDS = [installation_id, owner, repo, pr_number, head_sha]
         for field in REQUIRED_FIELDS:
             if not field:
                 print(f"Required field {field} not found in payload\n")
                 return False, f"Required field {field} not found in payload" # TODO raise 400
-        return owner, repo, pr_number, head_sha, installation_id
+        return installation_id, owner, repo, pr_number, head_sha
 
     def on_opened(self, payload):
-        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
+        installation_id, owner, repo, pr_number, head_sha  = self.validate_payload(payload)
         review_id = f"{repo}_{pr_number}_{head_sha}"
         review_pr.apply_async(
             task_id=review_id,

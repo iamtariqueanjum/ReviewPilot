@@ -81,7 +81,7 @@ localhost:6379
 Run Celery worker for background tasks:
 
 ```bash
-celery -A app.core.celery_app.celery_app worker -Q review_pr_queue --loglevel=debug
+celery -A app.core.celery_app.celery_app worker -Q review_pr_queue,create_repo_embeddings_queue --loglevel=debug
 ```
 
 ## 🧠 Architecture Overview

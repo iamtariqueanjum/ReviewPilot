@@ -36,10 +36,14 @@ class HTTPMethod(str, Enum):
 
 class GitHubRoutes(str, Enum):
     INSTALLATION_ACCESS_TOKEN = "/app/installations/{installation_id}/access_tokens"
-    GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}"
+    GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}" # TODO remove this redundant
     GET_PR_FILES = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
     GET_FILE_CONTENT = "/repos/{owner}/{repo}/contents/{path}?ref={head_sha}"
     POST_COMMENT = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
+    GET_REPOSITORY = '/repos/{owner}/{repo}'
+    GET_BRANCH = '/repos/{owner}/{repo}/branches/{branch}'
+    GET_TREE_RECURSIVE = '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1'
+    GET_BLOB_CONTENT = '/repos/{owner}/{repo}/git/blobs/{file_sha}'
 
 
 class APIEndpoints(str, Enum):
@@ -68,3 +72,4 @@ class ConfigConstants(str, Enum):
 
 class QueueConstants(str, Enum):
     REVIEW_PR_QUEUE = "review_pr_queue"
+    CREATE_REPO_EMBEDDINGS_QUEUE = "create_repo_embeddings_queue"

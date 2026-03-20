@@ -10,6 +10,7 @@ class GithubService(object):
     def __init__(self, installation_id):
         self.client = GitHubClient(installation_id)
 
+    # TODO remove this
     def get_pr(self, owner, repo, pr_number):
         """
         :param owner:
@@ -120,4 +121,87 @@ class GithubService(object):
             logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)
             raise
 
+    # TODO move owner, repo to class level attributes in class instantiations and remove from method params
+    def get_repository(self, owner, repo):
+        try:
+            path = GitHubRoutes.GET_REPOSITORY.value.format(owner=owner, repo=repo)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
 
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved repo details for {owner}/{repo}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve repo details for %s/%s: status=%s body=%s",
+                         owner, repo, status, body)
+            print(f"Failed to retrieve repo details for {owner}/{repo}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve repo details for {owner}/{repo}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving repo details for %s/%s", owner, repo)
+            raise
+
+    def get_branch(self, owner, repo, branch):
+        try:
+            path = GitHubRoutes.GET_BRANCH.value.format(owner=owner, repo=repo, branch=branch)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved branch details for {owner}/{repo}/{branch}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve branch details for %s/%s/%s: status=%s body=%s",
+                         owner, repo, branch, status, body)
+            print(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving branch details for %s/%s/%s", owner, repo, branch)
+            raise
+
+    def get_tree_recursive(self, owner, repo, tree_sha):
+        try:
+            path = GitHubRoutes.GET_TREE_RECURSIVE.value.format(owner=owner, repo=repo, tree_sha=tree_sha)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved tree details for {owner}/{repo}/{tree_sha}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve tree details for %s/%s/%s: status=%s body=%s",
+                         owner, repo, tree_sha, status, body)
+            print(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving tree details for %s/%s/%s", owner, repo, tree_sha)
+            raise
+
+    def get_blob_content(self, owner, repo, file_sha):
+        try:
+            path = GitHubRoutes.GET_BLOB_CONTENT.value.format(owner=owner, repo=repo, file_sha=file_sha)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved blob content for {owner}/{repo}/{file_sha}")
+                print(f"GitHub response: status={status} body={body}")
+                return base64.b64decode(body.get("content", "")).decode("utf-8")
+            # TODO check logs
+            logger.error("Failed to retrieve blob content for %s/%s/%s: status=%s body=%s",
+                         owner, repo, file_sha, status, body)
+            print(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving blob content for %s/%s/%s", owner, repo, file_sha)
+            raise
