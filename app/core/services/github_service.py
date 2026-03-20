@@ -10,6 +10,7 @@ class GithubService(object):
     def __init__(self, installation_id):
         self.client = GitHubClient(installation_id)
 
+    # TODO remove this
     def get_pr(self, owner, repo, pr_number):
         """
         :param owner:
@@ -120,4 +121,23 @@ class GithubService(object):
             logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)
             raise
 
+    def get_repository(self, owner, repo):
+        try:
+            path = GitHubRoutes.GET_REPOSITORY.value.format(owner=owner, repo=repo)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
 
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved repo details for {owner}/{repo}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve repo details for %s/%s: status=%s body=%s",
+                         owner, repo, status, body)
+            print(f"Failed to retrieve repo details for {owner}/{repo}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve repo details for {owner}/{repo}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving repo details for %s/%s", owner, repo)
+            raise
