@@ -42,6 +42,7 @@ class GitHubRoutes(str, Enum):
     POST_COMMENT = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
     GET_REPOSITORY = '/repos/{owner}/{repo}'
     GET_BRANCH = '/repos/{owner}/{repo}/branches/{branch}'
+    GET_TREE_RECURSIVE = '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1'
 
 
 class APIEndpoints(str, Enum):

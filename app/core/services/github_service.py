@@ -163,3 +163,24 @@ class GithubService(object):
             # TODO check logs
             logger.exception("Error while retrieving branch details for %s/%s/%s", owner, repo, branch)
             raise
+
+    def get_tree_recursive(self, owner, repo, tree_sha):
+        try:
+            path = GitHubRoutes.GET_TREE_RECURSIVE.value.format(owner=owner, repo=repo, tree_sha=tree_sha)
+            result = self.client.call_api(HTTPMethod.GET, path)
+            status = result.get("status_code")
+            body = result.get("body")
+
+            if status and 200 <= status < 300:
+                print(f"Successfully retrieved tree details for {owner}/{repo}/{tree_sha}")
+                print(f"GitHub response: status={status} body={body}")
+                return body
+            # TODO check logs
+            logger.error("Failed to retrieve tree details for %s/%s/%s: status=%s body=%s",
+                         owner, repo, tree_sha, status, body)
+            print(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status} body={body}")
+            raise ValueError(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status}")
+        except Exception:
+            # TODO check logs
+            logger.exception("Error while retrieving tree details for %s/%s/%s", owner, repo, tree_sha)
+            raise
