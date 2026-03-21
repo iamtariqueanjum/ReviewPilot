@@ -38,5 +38,6 @@ class EmbeddingService(object):
                                 owner=owner, repo=repo, file_name=file_name, extension=file_extension,
                                 language=language,file_content=file_content, file_path=file_path,
                                 commit_sha=commit_sha)
+                            # TODO generate summary for each chunk
                             # TODO store in vector database
 

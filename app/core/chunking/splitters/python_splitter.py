@@ -14,18 +14,7 @@ class PythonSplitter(BaseSplitter):
             lines = file_content.split("\n")
             tree = ast.parse(file_content)
             chunk_index = 1
-            imports = []
-            for node in ast.walk(tree):
-                # import x, y
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        imports.append(alias.name)
-                # from x import y
-                elif isinstance(node, ast.ImportFrom):
-                    module = node.module or ""
-                    for alias in node.names:
-                        full_import = f"{module}.{alias.name}" if module else alias.name
-                        imports.append(full_import)
+            imports = self.extract_imports(tree)
             for node in ast.walk(tree):
                 # def
                 if isinstance(node, ast.FunctionDef):
@@ -58,3 +47,19 @@ class PythonSplitter(BaseSplitter):
             # TODO Fallback splitter
             raise e
         return chunks
+
+    @staticmethod
+    def extract_imports(tree):
+        imports = []
+        for node in ast.walk(tree):
+            # import x, y
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    imports.append(alias.name)
+            # from x import y
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                for alias in node.names:
+                    full_import = f"{module}.{alias.name}" if module else alias.name
+                    imports.append(full_import)
+        return imports
