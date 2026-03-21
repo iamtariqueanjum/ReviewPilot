@@ -35,11 +35,18 @@ class HTTPMethod(str, Enum):
 
 
 class GitHubRoutes(str, Enum):
+    # Installation Token-related
     INSTALLATION_ACCESS_TOKEN = "/app/installations/{installation_id}/access_tokens"
+
+    # Pull Request-related
     GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}" # TODO remove this redundant
     GET_PR_FILES = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
     GET_FILE_CONTENT = "/repos/{owner}/{repo}/contents/{path}?ref={head_sha}"
+
+    # comment-related
     POST_COMMENT = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
+
+    # repo-related
     GET_REPOSITORY = '/repos/{owner}/{repo}'
     GET_BRANCH = '/repos/{owner}/{repo}/branches/{branch}'
     GET_TREE_RECURSIVE = '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1'
