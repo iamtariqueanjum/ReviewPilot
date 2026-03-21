@@ -1,4 +1,5 @@
 from app.core.services.github_service import GithubService
+from app.core.chunking.splitter_factory import SplitterFactory
 
 
 class EmbeddingService(object):
@@ -26,13 +27,16 @@ class EmbeddingService(object):
                 file_path = item.get('path') # app/core/services/review_service.py
                 file_name = file_path.split('/')[-1]
                 file_extension = file_name.split('.')[-1]
+                file_sha = item.get('sha')
+                file_content = self.github_service.get_blob_content(owner=owner, repo=repo, file_sha=file_sha)
                 if file_extension not in ignore_files:
                     print(f"Processing file: {file_name} with extension: {file_extension} for repo: {owner}/{repo}") # TODO replace with logger
                     for language, extensions in lang_extensions.items():
                         if file_extension in extensions:
-                            # found language
-                            pass
-                file_sha = item.get('sha')
-                file_content = self.github_service.get_blob_content(owner=owner, repo=repo, file_sha=file_sha)
-                # TODO create embedding for file_content and store in vector database with metadata (owner, repo, file_path)
+                            splitter = SplitterFactory.get_splitter(language)
+                            chunks = splitter.split(
+                                owner=owner, repo=repo, file_name=file_name, extension=file_extension,
+                                language=language,file_content=file_content, file_path=file_path,
+                                commit_sha=commit_sha)
+                            # TODO store in vector database
 

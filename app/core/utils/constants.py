@@ -80,3 +80,9 @@ class ConfigConstants(str, Enum):
 class QueueConstants(str, Enum):
     REVIEW_PR_QUEUE = "review_pr_queue"
     CREATE_REPO_EMBEDDINGS_QUEUE = "create_repo_embeddings_queue"
+
+
+class Language(str, Enum):
+    PYTHON = 'Python'
+    JAVA = 'Java' # TODO support to be added
+    GO_LANG = 'Go' # TODO support to be added
