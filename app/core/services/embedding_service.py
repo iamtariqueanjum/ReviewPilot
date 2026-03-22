@@ -50,20 +50,23 @@ class EmbeddingService(object):
                             print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
                             VectorStoreService().upsert_chunks(chunks)
 
-    @staticmethod
-    def generate_embeddings(chunks):
-        from openai import OpenAI
-        client = OpenAI()
-        # TODO Exception Handling
+    def generate_embeddings(self, chunks):
         for chunk in chunks:
-            try:
-                response = client.embeddings.create(
-                    model="text-embedding-3-large",  # TODO fetch from ConfigConstants
-                    input=chunk['chunk_content']      # TODO optimisation batch embeddings
-                )
-            except Exception as e:
-                raise e
+            response = self.call_openai_embeddings(chunk['chunk_content'])  # TODO optimisation batch embeddings
             chunk['embedding'] = response.data[0].embedding
             chunk['created_at'] = datetime.utcnow()
             chunk['updated_at'] = datetime.utcnow()
         return chunks
+
+    @staticmethod
+    def call_openai_embeddings(content):
+        from openai import OpenAI
+        client = OpenAI()
+        try:
+            response = client.embeddings.create(
+                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                input=content
+            )
+        except Exception as e:
+            raise e
+        return response
