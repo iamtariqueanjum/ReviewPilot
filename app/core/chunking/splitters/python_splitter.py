@@ -22,7 +22,6 @@ class PythonSplitter(BaseSplitter):
                     chunk = "\n".join(lines[start:end])
                     chunk_id = f"chunk_{chunk_index}"
                     chunks.append({
-                        "id": f"{payload['repo']}:{payload['file_path']}:{chunk_id}",
                         "owner": payload['owner'],
                         "repo": payload['repo'],
 
@@ -31,8 +30,9 @@ class PythonSplitter(BaseSplitter):
                         "file_extension": payload['file_extension'],
                         "language": payload['language'],
 
+                        "chunk_id": chunk_id,
                         "chunk_name": node.name,
-                        "chunk_content": chunk,
+                        "chunk_content": chunk, # TODO move to DB store from vector store
                         "chunk_index": chunk_index,
                         "chunk_start_line": start,
                         "chunk_end_line": end,

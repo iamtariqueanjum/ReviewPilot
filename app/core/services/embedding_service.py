@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from app.core.services.github_service import GithubService
 from app.core.chunking.splitter_factory import SplitterFactory
+from app.integrations.vectorstore.service import VectorStoreService
 
 
 class EmbeddingService(object):
@@ -39,21 +42,28 @@ class EmbeddingService(object):
                                        'file_extension': file_extension, 'language': language, 'file_content': file_content,
                                        'file_path': file_path, 'commit_sha': commit_sha}
                             chunks = splitter.split(payload)
+                            if not chunks:
+                                continue
                             # TODO generate summary for each chunk
                             print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
                             chunks = self.generate_embeddings(chunks)
                             print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
-
-                            # TODO store in vector database
+                            VectorStoreService().upsert_chunks(chunks)
 
     @staticmethod
     def generate_embeddings(chunks):
         from openai import OpenAI
         client = OpenAI()
+        # TODO Exception Handling
         for chunk in chunks:
-            response = client.embeddings.create(
-                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
-                input=chunk['chunk_content']
-            )
+            try:
+                response = client.embeddings.create(
+                    model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                    input=chunk['chunk_content']      # TODO optimisation batch embeddings
+                )
+            except Exception as e:
+                raise e
             chunk['embedding'] = response.data[0].embedding
+            chunk['created_at'] = datetime.utcnow()
+            chunk['updated_at'] = datetime.utcnow()
         return chunks

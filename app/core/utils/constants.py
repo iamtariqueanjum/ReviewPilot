@@ -86,3 +86,8 @@ class Language(str, Enum):
     PYTHON = 'Python'
     JAVA = 'Java' # TODO support to be added
     GO_LANG = 'Go' # TODO support to be added
+
+
+class VectorStore(str, Enum):
+    COLLECTION_NAME = "code_chunks"
+    VECTOR_SIZE = 3072
