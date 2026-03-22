@@ -84,6 +84,21 @@ Run Celery worker for background tasks:
 celery -A app.core.celery_app.celery_app worker -Q review_pr_queue,create_repo_embeddings_queue --loglevel=debug
 ```
 
+## 💽 3. Run Qdrant using Docker
+
+Start Qdrant container:
+
+```bash
+docker run -d -p  6333:6333 qdrant/qdrant
+```
+
+This will run Qdrant locally on:
+
+```
+http://localhost:6333/dashboard#/welcome
+```
+
+---
 ## 🧠 Architecture Overview
 
 * **FastAPI** → Handles API requests
