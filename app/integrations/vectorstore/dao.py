@@ -12,6 +12,7 @@ class VectorStoreDao:
         self.vector_size = VectorStore.VECTOR_SIZE.value
 
     def create_collection(self):
+        print(f"CREATING COLLECTION: {self.collection}")
         try:
             response = self.client.create_collection(
                 collection_name=self.collection,
@@ -25,6 +26,7 @@ class VectorStoreDao:
         return response
 
     def delete_collection(self):
+        print(f"DELETING COLLECTION: {self.collection}")
         try:
             response = self.client.delete_collection(collection_name=self.collection)
         except Exception as e:
