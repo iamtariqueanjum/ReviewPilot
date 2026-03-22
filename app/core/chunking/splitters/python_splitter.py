@@ -8,11 +8,11 @@ class PythonSplitter(BaseSplitter):
     def __init__(self):
         super().__init__()
 
-    def split(self, owner, repo, file_name, extension, language, file_content, file_path, commit_sha):
+    def split(self, payload):
         chunks = []
         try:
-            lines = file_content.split("\n")
-            tree = ast.parse(file_content)
+            lines = payload['file_content'].split("\n")
+            tree = ast.parse(payload['file_content'])
             chunk_index = 1
             imports = self.extract_imports(tree)
             for node in ast.walk(tree):
@@ -22,14 +22,14 @@ class PythonSplitter(BaseSplitter):
                     chunk = "\n".join(lines[start:end])
                     chunk_id = f"chunk_{chunk_index}"
                     chunks.append({
-                        "id": f"{repo}:{file_path}:{chunk_id}",
-                        "owner": owner,
-                        "repo": repo,
+                        "id": f"{payload['repo']}:{payload['file_path']}:{chunk_id}",
+                        "owner": payload['owner'],
+                        "repo": payload['repo'],
 
-                        "file_path": file_path,
-                        "file_name": file_name,
-                        "extension": extension,
-                        "language": language,
+                        "file_path": payload['file_path'],
+                        "file_name": payload['file_name'],
+                        "file_extension": payload['file_extension'],
+                        "language": payload['language'],
 
                         "chunk_name": node.name,
                         "chunk_content": chunk,
@@ -38,7 +38,7 @@ class PythonSplitter(BaseSplitter):
                         "chunk_end_line": end,
 
                         "imports": imports,
-                        "commit_sha": commit_sha
+                        "commit_sha": payload['commit_sha']
 
                     })
                     chunk_index += 1

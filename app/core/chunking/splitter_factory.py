@@ -6,10 +6,11 @@ class SplitterFactory:
 
     def __init__(self):
         self.__registry = {
-            Language.PYTHON.value: PythonSplitter
+            Language.PYTHON.value: PythonSplitter()
         }
 
-    def get_splitter(self, language: str):
+    def get_splitter(self, language):
         splitter = self.__registry.get(language)
         if splitter is None:
             raise ValueError(f"Unsupported Langauge: {language}")
+        return splitter

@@ -9,5 +9,5 @@ class BaseSplitter(ABC):
         pass
 
     @abstractmethod
-    def split(self, owner, repo, file_name, extension, language,file_content, file_path, commit_sha):
+    def split(self, payload):
         pass

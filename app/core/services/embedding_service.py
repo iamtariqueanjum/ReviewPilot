@@ -21,7 +21,7 @@ class EmbeddingService(object):
             "Python": ["py"],
             "Java": ["java"]
         }
-        ignore_files = [".git", "__pycache__", ".venv", "LICENSE", "README.md"]  # TODO make this configurable for all languages
+        ignore_files = [".git", "__pycache__", ".venv", "LICENSE", "md"]  # TODO make this configurable for all languages
         for item in tree_details.get('tree', []):
             if item.get('type') == 'blob' and item.get('size', 0) < 100000:  # TODO make this configurable < 100KB. Make blob a constant
                 file_path = item.get('path') # app/core/services/review_service.py
@@ -30,14 +30,30 @@ class EmbeddingService(object):
                 file_sha = item.get('sha')
                 file_content = self.github_service.get_blob_content(owner=owner, repo=repo, file_sha=file_sha)
                 if file_extension not in ignore_files:
-                    print(f"Processing file: {file_name} with extension: {file_extension} for repo: {owner}/{repo}") # TODO replace with logger
+                    print(f"Processing file: {file_path} with extension: {file_extension} for repo: {owner}/{repo}") # TODO replace with logger
                     for language, extensions in lang_extensions.items():
+                        print(f"Language {language}: {extensions}")
                         if file_extension in extensions:
-                            splitter = SplitterFactory.get_splitter(language)
-                            chunks = splitter.split(
-                                owner=owner, repo=repo, file_name=file_name, extension=file_extension,
-                                language=language,file_content=file_content, file_path=file_path,
-                                commit_sha=commit_sha)
+                            splitter = SplitterFactory().get_splitter(language=language)
+                            payload = {'owner': owner, 'repo': repo, 'file_name': file_name,
+                                       'file_extension': file_extension, 'language': language, 'file_content': file_content,
+                                       'file_path': file_path, 'commit_sha': commit_sha}
+                            chunks = splitter.split(payload)
                             # TODO generate summary for each chunk
+                            print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
+                            chunks = self.generate_embeddings(chunks)
+                            print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
+
                             # TODO store in vector database
 
+    @staticmethod
+    def generate_embeddings(chunks):
+        from openai import OpenAI
+        client = OpenAI()
+        for chunk in chunks:
+            response = client.embeddings.create(
+                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                input=chunk['chunk_content']
+            )
+            chunk['embedding'] = response.data[0].embedding
+        return chunks
