@@ -15,9 +15,9 @@ class IssueCommentEventHandler(object):
         comment = payload.get("comment", {}).get("body")
 
         if "@ReviewPilot re-review" in comment:
-            print(f"Re-review comment detected... Re-reviewing the PR...\n")
+            print(f"Re-review comment detected... Re-reviewing the PR...\n") # TODO
         elif "@ReviewPilot review" in comment:
-            print(f"Review comment detected... Reviewing the PR...\n")
+            print(f"Review comment detected... Reviewing the PR...\n") # TODO
         elif "@ReviewPilot summarize" in comment:
-            print(f"Summarize comment detected... Summarizing the PR...\n")
+            print(f"Summarize comment detected... Summarizing the PR...\n") # TODO
 
