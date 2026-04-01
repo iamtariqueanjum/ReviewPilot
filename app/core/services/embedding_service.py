@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from langchain_core.prompts import ChatPromptTemplate
+
 from app.core.services.github_service import GithubService
 from app.core.chunking.splitter_factory import SplitterFactory
+from app.integrations.llm.llm_factory import LLMFactory
 from app.integrations.vectorstore.service import VectorStoreService
 
 
@@ -44,11 +47,44 @@ class EmbeddingService(object):
                             chunks = splitter.split(payload)
                             if not chunks:
                                 continue
-                            # TODO generate summary for each chunk
+                            chunks = self.generate_code_summaries(chunks)
                             print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
                             chunks = self.generate_embeddings(chunks)
                             print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
                             VectorStoreService().upsert_chunks(chunks)
+
+
+    @staticmethod
+    def generate_code_summaries(chunks):
+        llm = LLMFactory.get_llm(provider="openai") # TODO make provider configurable
+        for chunk in chunks:
+            code = chunk.get('chunk_content')
+            prompt = f"""Summarize the code in a single line code: {code}"""
+            prompt_template = ChatPromptTemplate.from_template(prompt)
+            chain = prompt_template | llm
+            try:
+                result = chain.invoke({"code": code}) # TODO Batch processing optimisation
+                chunk['summary'] = result.content
+            except Exception as e:
+                print(f"Error generating summary for chunk: {chunk.get('chunk_id')}, error: {str(e)}") # TODO replace with logger
+                chunk['summary'] = "Summary not available"
+                # TODO add retry mechanism and Handle Partial Failures
+        return chunks
+
+
+    @staticmethod
+    def call_openai_embeddings(content):
+        from openai import OpenAI
+        client = OpenAI()
+        try:
+            response = client.embeddings.create(
+                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                input=content
+            )
+        except Exception as e: # TODO exception handling
+            raise e
+        return response
+
 
     def generate_embeddings(self, chunks):
         for chunk in chunks:
