@@ -2,6 +2,7 @@ import re
 
 from app.core.api.models.review_response import ReviewLLMResponse
 from app.core.logger import logger
+from app.core.services.embedding_service import EmbeddingService
 from app.integrations.llm.llm_factory import LLMFactory
 from app.core.utils.pr_comment_util import get_markdown_review_comment
 from app.integrations.llm.prompts.review_pr.final_prompt import prompt
@@ -13,6 +14,7 @@ class ReviewService(object):
     def __init__(self, installation_id, provider=None):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
+        self.embedding_service = EmbeddingService(installation_id)
         self.llm = LLMFactory.get_llm(provider)
         self.structured_llm = self.llm.with_structured_output(ReviewLLMResponse)
         self.chain = prompt | self.structured_llm
@@ -21,6 +23,8 @@ class ReviewService(object):
         # TODO exception handling
         pr_diff = self.get_pr_diff(owner, repo, pr_number, head_sha)
         print(f"PR Diff for {owner}/{repo}#{pr_number}:\n{pr_diff}\n")
+        pr_filepaths = self.get_pr_filepaths(owner, repo, pr_number)
+        context = self.embedding_service.get_relevant_context(repo, pr_filepaths)
         # TODO exception handling
         llm_response = self.chain.invoke(
             {"pr_diff": pr_diff}
@@ -31,6 +35,18 @@ class ReviewService(object):
         # TODO move this api call to async flow and add exception handling
         self.github_service.post_comment(owner, repo, pr_number, body)
         return {"message": "Review comment posted successfully", "status": "success"}
+
+    def get_pr_filepaths(self, owner, repo, pr_number):
+        filepaths = []
+        try:
+            files = self.github_service.get_pr_files(owner, repo, pr_number)
+            for file in files:
+                filepaths.append(file.get("filename"))
+            return filepaths
+        except Exception as e:
+            logger.exception(f"Error while fetching PR file paths for {owner}/{repo}#{pr_number}")
+            raise ValueError(f"Error while fetching PR file paths for {owner}/{repo}#{pr_number}: {str(e)}")
+
 
     def get_pr_diff(self, owner, repo, pr_number, head_sha):
         try:

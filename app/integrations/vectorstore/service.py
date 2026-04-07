@@ -1,7 +1,7 @@
 import uuid
 
 
-from qdrant_client.models import PointStruct
+from qdrant_client.models import PointStruct, Filter, FieldCondition, MatchValue
 
 from app.core.utils.constants import VectorStore
 from app.integrations.vectorstore.dao import VectorStoreDao
@@ -54,3 +54,17 @@ class VectorStoreService:
             # TODO logger
             return None
         return response
+
+
+    def filter_chunks_by_filepath(self, repo, file_path, limit=50):
+        results = self.dao.client.scroll(
+            collection_name=VectorStore.COLLECTION_NAME.value,
+            scroll_filter=Filter(
+                    must=[
+                        FieldCondition(key="repo", match=MatchValue(value=repo)),
+                        FieldCondition(key="file_path", match=MatchValue(value=file_path))
+                    ]
+                ),
+                limit=limit
+            )
+        return results

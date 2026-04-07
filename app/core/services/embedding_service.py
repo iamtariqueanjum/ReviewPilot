@@ -13,6 +13,7 @@ class EmbeddingService(object):
     def __init__(self, installation_id):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
+        self.vectorstore_service = VectorStoreService()
 
 
     def create_repo_embeddings(self, owner, repo):
@@ -47,19 +48,20 @@ class EmbeddingService(object):
                             chunks = splitter.split(payload)
                             if not chunks:
                                 continue
-                            chunks = self.generate_code_summaries(chunks)
+                            # chunks = self.generate_code_summaries(chunks) # TODO move this to async flow after insertion
                             print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
                             chunks = self.generate_embeddings(chunks)
                             print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
-                            VectorStoreService().upsert_chunks(chunks)
+                            self.vectorstore_service.upsert_chunks(chunks)
 
 
+    # TODO FIX THIS - summaries not saved in vector db
     @staticmethod
     def generate_code_summaries(chunks):
         llm = LLMFactory.get_llm(provider="openai") # TODO make provider configurable
         for chunk in chunks:
             code = chunk.get('chunk_content')
-            prompt = f"""Summarize the code in a single line code: {code}"""
+            prompt = "Summarize the code in a single line code: {code}"
             prompt_template = ChatPromptTemplate.from_template(prompt)
             chain = prompt_template | llm
             try:
@@ -106,3 +108,22 @@ class EmbeddingService(object):
         except Exception as e:
             raise e
         return response
+
+    def get_relevant_context(self, repo, file_paths):
+        filtered_chunks = []
+        for file_path in file_paths:
+            filtered_chunks.append(self.vectorstore_service.filter_chunks_by_filepath(repo, file_path))
+
+        context = ""
+        for filtered_chunk in filtered_chunks:
+            chunks, _ = filtered_chunk
+            chunks = sorted(chunks, key=lambda x: x.dict()["payload"]["chunk_index"])
+
+            for chunk in chunks:
+                payload = chunk.dict().get('payload', {})
+                context += f"File Path: {payload['file_path']}\n"
+                context += f"Function: {payload['chunk_name']}\n"
+                context += f"Code: \n{payload['chunk_content']}\n\n\n"
+                # TODO add summary
+
+        return context
