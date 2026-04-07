@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from langchain_core.prompts import ChatPromptTemplate
+
 from app.core.services.github_service import GithubService
 from app.core.chunking.splitter_factory import SplitterFactory
+from app.integrations.llm.llm_factory import LLMFactory
 from app.integrations.vectorstore.service import VectorStoreService
 
 
@@ -10,6 +13,7 @@ class EmbeddingService(object):
     def __init__(self, installation_id):
         self.installation_id = installation_id
         self.github_service = GithubService(installation_id)
+        self.vectorstore_service = VectorStoreService()
 
 
     def create_repo_embeddings(self, owner, repo):
@@ -44,26 +48,82 @@ class EmbeddingService(object):
                             chunks = splitter.split(payload)
                             if not chunks:
                                 continue
-                            # TODO generate summary for each chunk
+                            # chunks = self.generate_code_summaries(chunks) # TODO move this to async flow after insertion
                             print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
                             chunks = self.generate_embeddings(chunks)
                             print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
-                            VectorStoreService().upsert_chunks(chunks)
+                            self.vectorstore_service.upsert_chunks(chunks)
+
+
+    # TODO FIX THIS - summaries not saved in vector db
+    @staticmethod
+    def generate_code_summaries(chunks):
+        llm = LLMFactory.get_llm(provider="openai") # TODO make provider configurable
+        for chunk in chunks:
+            code = chunk.get('chunk_content')
+            prompt = "Summarize the code in a single line code: {code}"
+            prompt_template = ChatPromptTemplate.from_template(prompt)
+            chain = prompt_template | llm
+            try:
+                result = chain.invoke({"code": code}) # TODO Batch processing optimisation
+                chunk['summary'] = result.content
+            except Exception as e:
+                print(f"Error generating summary for chunk: {chunk.get('chunk_id')}, error: {str(e)}") # TODO replace with logger
+                chunk['summary'] = "Summary not available"
+                # TODO add retry mechanism and Handle Partial Failures
+        return chunks
+
 
     @staticmethod
-    def generate_embeddings(chunks):
+    def call_openai_embeddings(content):
         from openai import OpenAI
         client = OpenAI()
-        # TODO Exception Handling
+        try:
+            response = client.embeddings.create(
+                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                input=content
+            )
+        except Exception as e: # TODO exception handling
+            raise e
+        return response
+
+
+    def generate_embeddings(self, chunks):
         for chunk in chunks:
-            try:
-                response = client.embeddings.create(
-                    model="text-embedding-3-large",  # TODO fetch from ConfigConstants
-                    input=chunk['chunk_content']      # TODO optimisation batch embeddings
-                )
-            except Exception as e:
-                raise e
+            response = self.call_openai_embeddings(chunk['chunk_content'])  # TODO optimisation batch embeddings
             chunk['embedding'] = response.data[0].embedding
             chunk['created_at'] = datetime.utcnow()
             chunk['updated_at'] = datetime.utcnow()
         return chunks
+
+    @staticmethod
+    def call_openai_embeddings(content):
+        from openai import OpenAI
+        client = OpenAI()
+        try:
+            response = client.embeddings.create(
+                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
+                input=content
+            )
+        except Exception as e:
+            raise e
+        return response
+
+    def get_relevant_context(self, repo, file_paths):
+        filtered_chunks = []
+        for file_path in file_paths:
+            filtered_chunks.append(self.vectorstore_service.filter_chunks_by_filepath(repo, file_path))
+
+        context = ""
+        for filtered_chunk in filtered_chunks:
+            chunks, _ = filtered_chunk
+            chunks = sorted(chunks, key=lambda x: x.dict()["payload"]["chunk_index"])
+
+            for chunk in chunks:
+                payload = chunk.dict().get('payload', {})
+                context += f"File Path: {payload['file_path']}\n"
+                context += f"Function: {payload['chunk_name']}\n"
+                context += f"Code: \n{payload['chunk_content']}\n\n\n"
+                # TODO add summary
+
+        return context

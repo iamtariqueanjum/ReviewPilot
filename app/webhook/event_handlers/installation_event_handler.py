@@ -39,7 +39,6 @@ class InstallationEventHandler(object):
                 queue=QueueConstants.CREATE_REPO_EMBEDDINGS_QUEUE
             )
             print(f"Repo embedding creation pushed to queue {task_id}\n")
-        # TODO Embedding Service call to create repo embeddings for all repos in the installation
 
     @staticmethod
     def on_deleted(payload):
