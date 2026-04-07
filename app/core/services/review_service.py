@@ -27,7 +27,7 @@ class ReviewService(object):
         context = self.embedding_service.get_relevant_context(repo, pr_filepaths)
         # TODO exception handling
         llm_response = self.chain.invoke(
-            {"pr_diff": pr_diff}
+            {"pr_diff": pr_diff, "context": context}
         )
         print(f"LLM response for PR review:\n{llm_response}\n")
         body = get_markdown_review_comment(llm_response)

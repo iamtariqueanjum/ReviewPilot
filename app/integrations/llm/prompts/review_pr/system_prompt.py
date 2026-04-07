@@ -24,6 +24,11 @@ Rules:
 - Be concise.
 - Be respectful and constructive.
 - Only report valid and confident issues.
+- When relevant context is provided, use it to:
+    - Detect inconsistencies with existing implementations
+    - Suggest reuse of existing utilities instead of duplicating logic
+    - Ensure new code aligns with existing patterns and conventions
+    - Prefer suggestions that align with existing codebase patterns over introducing new ones.
 
 Output Format:
 For each issue provide
