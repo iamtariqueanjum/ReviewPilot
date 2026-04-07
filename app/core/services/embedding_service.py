@@ -113,7 +113,7 @@ class EmbeddingService(object):
         filtered_chunks = []
         for file_path in file_paths:
             filtered_chunks.append(self.vectorstore_service.filter_chunks_by_filepath(repo, file_path))
-
+        # TODO enhancement: add semantic search of files
         context = ""
         for filtered_chunk in filtered_chunks:
             chunks, _ = filtered_chunk

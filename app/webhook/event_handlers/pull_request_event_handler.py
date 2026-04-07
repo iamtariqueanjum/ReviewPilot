@@ -56,7 +56,7 @@ class PullRequestEventHandler(object):
         return {"message": f"Review for PR {owner}/{repo}#{pr_number} has been queued", "status": "success"}
 
     def on_synchronize(self, payload):
-        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
+        installation_id, owner, repo, pr_number, head_sha = self.validate_payload(payload)
         print(f"Synchronize event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         response = self.api_client.call_api(
             method=HTTPMethod.POST,
@@ -67,7 +67,7 @@ class PullRequestEventHandler(object):
         print(f"API Call made - Review response: {response}\n")
 
     def on_reopened(self, payload):
-        owner, repo, pr_number, head_sha, installation_id = self.validate_payload(payload)
+        installation_id, owner, repo, pr_number, head_sha = self.validate_payload(payload)
         print(f"Re-open event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
         review_id = f"{repo}_{pr_number}_{head_sha}"
         review_pr.apply_async(
