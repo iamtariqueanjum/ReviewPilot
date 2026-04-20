@@ -58,13 +58,13 @@ class PullRequestEventHandler(object):
     def on_synchronize(self, payload):
         installation_id, owner, repo, pr_number, head_sha = self.validate_payload(payload)
         print(f"Synchronize event received for PR {owner}/{repo}#{pr_number} with head SHA {head_sha}\n")
-        response = self.api_client.call_api(
-            method=HTTPMethod.POST,
-            path=APIEndpoints.REVIEW_PR.value,
-            json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
-                  "installation_id": installation_id, "re_review": True}
-        )
-        print(f"API Call made - Review response: {response}\n")
+        # response = self.api_client.call_api(
+        #     method=HTTPMethod.POST,
+        #     path=APIEndpoints.REVIEW_PR.value,
+        #     json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
+        #           "installation_id": installation_id, "re_review": True}
+        # )
+        # print(f"API Call made - Review response: {response}\n")
 
     def on_reopened(self, payload):
         installation_id, owner, repo, pr_number, head_sha = self.validate_payload(payload)
