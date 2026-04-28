@@ -4,8 +4,8 @@ from app.core.api.models.review_response import ReviewLLMResponse
 from app.core.logger import logger
 from app.core.services.embedding_service import EmbeddingService
 from app.integrations.llm.llm_factory import LLMFactory
-from app.core.utils.pr_comment_util import get_markdown_review_comment
 from app.integrations.llm.prompts.review_pr.final_prompt import prompt
+from app.integrations.llm.response_formatter import get_markdown_review_comment
 from app.core.services.github_service import GithubService
 
 

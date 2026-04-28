@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from app.core.utils.constants import ConfigConstants, GitHubRoutes, HTTPMethod
-from app.core.utils.github_auth import generate_jwt
+from app.integrations.github.auth import generate_jwt
 
 from app.core.logger import logger
 

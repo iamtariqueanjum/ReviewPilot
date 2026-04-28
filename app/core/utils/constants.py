@@ -16,6 +16,8 @@ class GitHubWHAction(str, Enum):
 class GitHubWHEvent(str, Enum):
     INSTALLATION = "installation"
     PULL_REQUEST = "pull_request"
+    # PULL_REQUEST_REVIEW = "pull_request_review" # TODO inline review/chatbot
+    # PULL_REQUEST_REVIEW_COMMENT = "pull_request_review_comment" # TODO inline review/chatbot
     ISSUE_COMMENT = "issue_comment"
     PUSH = "push"
 
