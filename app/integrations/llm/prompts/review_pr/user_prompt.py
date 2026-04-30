@@ -20,6 +20,4 @@ Instructions:
 - If no issues are found in the diff, return no issues found.
 
 Now provide a detailed review.
-
- 
 """

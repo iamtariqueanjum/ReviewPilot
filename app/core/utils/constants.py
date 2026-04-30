@@ -13,6 +13,10 @@ class GitHubWHAction(str, Enum):
     SYNCHRONIZE = "synchronize"
 
 
+class GitHubBot(str, Enum):
+    USERNAME = "reviewpilot-ai-bot"
+
+
 class GitHubWHEvent(str, Enum):
     INSTALLATION = "installation"
     PULL_REQUEST = "pull_request"
@@ -82,6 +86,7 @@ class ConfigConstants(str, Enum):
 class QueueConstants(str, Enum):
     REVIEW_PR_QUEUE = "review_pr_queue"
     CREATE_REPO_EMBEDDINGS_QUEUE = "create_repo_embeddings_queue"
+    CHAT_MESSAGES_QUEUE = "chat_messages_queue"
 
 
 class Language(str, Enum):

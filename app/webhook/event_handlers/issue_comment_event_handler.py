@@ -1,25 +1,25 @@
-from app.core.utils.constants import GitHubWHAction
+from app.core.utils.constants import GitHubWHAction, GitHubBot
+from app.core.utils.input_validator import InputValidator
 
 
 class IssueCommentEventHandler(object):
 
+    def __init__ (self):
+        self.validator = InputValidator()
+
     def handle(self, payload):
         action = payload.get("action")
 
-        if action != GitHubWHAction.CREATED:
-            return
+        if action == GitHubWHAction.CREATED:
+            self.on_created(payload)
 
-        if not payload.get("issue", {}).get("pull_request"):
-            return
-
+    def on_created(self, payload):
         comment = payload.get("comment", {}).get("body")
+        if comment.startswith("@"+GitHubBot.USERNAME.value):
+            result = self.validator.validate(comment)
 
-        print(f"Pr comment: {comment}")
+            if not result.is_safe:
+                reason = result.reason
 
-        # if "@ReviewPilot re-review" in comment:
-        #     print(f"Re-review comment detected... Re-reviewing the PR...\n") # TODO
-        # elif "@ReviewPilot review" in comment:
-        #     print(f"Review comment detected... Reviewing the PR...\n") # TODO
-        # elif "@ReviewPilot summarize" in comment:
-        #     print(f"Summarize comment detected... Summarizing the PR...\n") # TODO
+            # TODO LLM worker integration
 
