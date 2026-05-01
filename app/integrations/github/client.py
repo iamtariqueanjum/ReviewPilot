@@ -14,7 +14,7 @@ from app.core.logger import logger
 
 
 class GitHubClient(object):
-    _token_cache = {}
+    _token_cache = {} # TODO move to Redis
 
     def __init__(self, installation_id, retries=3, timeout=60):
         self.installation_id = installation_id

@@ -10,7 +10,6 @@ class GithubService(object):
     def __init__(self, installation_id):
         self.client = GitHubClient(installation_id)
 
-    # TODO remove this
     def get_pr(self, owner, repo, pr_number):
         """
         :param owner:
