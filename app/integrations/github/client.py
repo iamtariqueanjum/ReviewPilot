@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import requests
+import time
+
 from requests.exceptions import HTTPError
 
 from requests.adapters import HTTPAdapter
@@ -12,6 +14,7 @@ from app.core.logger import logger
 
 
 class GitHubClient(object):
+    _token_cache = {}
 
     def __init__(self, installation_id, retries=3, timeout=60):
         self.installation_id = installation_id
@@ -65,9 +68,12 @@ class GitHubClient(object):
         print(f"API call: {method} {path} response: {response}")
         return response
 
-    # TODO set installation token in the cache for expiration and regenerate if expired
     def get_installation_access_token(self) -> str:
         try:
+            cache_data = self._token_cache.get(self.installation_id)
+            if cache_data and cache_data.get("expires_at") > time.time():
+                return cache_data["token"]
+
             path = GitHubRoutes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
             headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {generate_jwt()}"}
             result = self.call_api(HTTPMethod.POST, path, headers=headers)
@@ -76,7 +82,13 @@ class GitHubClient(object):
 
             if status and 200 <= status < 300 and isinstance(body, dict):
                 token = body.get("token")
+                expires_at = time.time() + 3600     # 1hr ttl
+
                 if token:
+                    self._token_cache[self.installation_id] = {
+                        'token': token,
+                        'expires_at': expires_at
+                    }
                     return token
                 raise ValueError("GitHub response did not contain an access token")
 
