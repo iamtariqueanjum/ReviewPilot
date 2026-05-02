@@ -6,9 +6,11 @@ from app.core.services.review_service import ReviewService
                  name="app.workers.review_worker.review_pr")
 def review_pr(self, installation_id, owner, repo, pr_number, head_sha):
     print(f"[WORKER] Reviewing PR {repo}#{pr_number}") # TODO replace with logger
-    review_service = ReviewService(installation_id=installation_id)
+    review_service = ReviewService(
+        owner, repo, installation_id
+    )
     response = review_service.review_pr(
-        owner=owner, repo=repo, pr_number=pr_number, head_sha=head_sha
+        pr_number=pr_number, head_sha=head_sha
     )
     print(f"[WORKER] Review done PR {repo}#{pr_number}") # TODO replace with logger
     return response

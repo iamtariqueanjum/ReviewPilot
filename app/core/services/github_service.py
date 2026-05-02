@@ -1,206 +1,78 @@
-import base64
-
 from app.core.logger import logger
+from app.core.utils.diff_parser import parse_new_lines, get_new_file_line_number, prepare_changed_lines_text
 from app.integrations.github.client import GitHubClient
-from app.core.utils.constants import GitHubRoutes, HTTPMethod
+from app.integrations.github.pr_service import PrService
+from app.integrations.github.repo_service import RepoService
+from app.integrations.github.comment_service import CommentService
 
 
 class GithubService(object):
 
-    def __init__(self, installation_id):
+    def __init__(self, owner, repo, installation_id):
+        self.owner = owner
+        self.repo = repo
         self.client = GitHubClient(installation_id)
+        self.pr_service = PrService(self.owner, self.repo, self.client)
+        self.repo_service = RepoService(self.owner, self.repo, self.client)
+        self.comment_service = CommentService(self.owner, self.repo, self.client)
 
-    def get_pr(self, owner, repo, pr_number):
-        """
-        :param owner:
-        :param repo:
-        :param pr_number:
-        :return:
-        """
+    def get_pr(self, pr_number):
+        return self.pr_service.get_pr(pr_number)
+
+    def get_pr_files(self, pr_number):
+        return self.pr_service.get_pr_files(pr_number)
+
+    def get_repository(self):
+        return self.repo_service.get_repository()
+
+    def get_branch(self, branch):
+        return self.repo_service.get_branch(branch)
+
+    def get_tree_recursive(self, tree_sha):
+        return self.repo_service.get_tree_recursive(tree_sha)
+
+    def get_file_content(self, path, head_sha):
+        return self.repo_service.get_file_content(path, head_sha)
+
+    def get_blob_content(self, file_sha):
+        return self.repo_service.get_blob_content(file_sha)
+
+    def post_comment(self, issue_number, comment):
+        return self.comment_service.post_comment(issue_number, comment)
+
+    def get_pr_filepaths(self, pr_number):
+        filepaths = []
         try:
-            path = GitHubRoutes.GET_PR.value.format(owner=owner, repo=repo, pull_number=pr_number)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
+            files = self.get_pr_files(pr_number)
+            for file in files:
+                filepaths.append(file.get("filename"))
+            return filepaths
+        except Exception as e:
+            logger.exception(f"Error while fetching PR file paths for {self.owner}/{self.repo}#{pr_number}")
+            raise ValueError(f"Error while fetching PR file paths for {self.owner}/{self.repo}#{pr_number}: {str(e)}")
 
-            if status and 200 <= status < 300:
-                return body
-            # TODO check logs
-            logger.error("Failed to fetch PR details for %s/%s#%s: status=%s body=%s",
-                         owner, repo, pr_number, status, body)
-            print(f"Failed to fetch PR details for {owner}/{repo}#{pr_number}: status={status} body={body}")
-            raise ValueError(f"Failed to fetch PR details for {owner}/{repo}#{pr_number}: status={status}")
-
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while fetching PR details for %s/%s#%s", owner, repo, pr_number)
-            raise
-
-    def get_pr_files(self, owner, repo, pr_number):
-        """
-        :param owner:
-        :param repo:
-        :param pr_number:
-        :return:
-        """
+    def get_pr_diff(self, pr_number, head_sha):
         try:
-            path = GitHubRoutes.GET_PR_FILES.value.format(owner=owner, repo=repo, pull_number=pr_number)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                response = []
-                for file in body:
-                    filename = file.get("filename")
-                    patch = file.get("patch")
-                    status = file.get("status")
-                    response.append({"filename": filename, "patch": patch, "status": status})
-                return response
-            # TODO check logs
-            logger.error("Failed to fetch PR file details for %s/%s#%s: status=%s body=%s",
-                         owner, repo, pr_number, status, body)
-            raise ValueError(f"Failed to fetch PR file details for {owner}/{repo}#{pr_number}: status={status}")
-
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while fetching PR file details for %s/%s#%s", owner, repo, pr_number)
-            raise
-
-    def get_file_content(self, owner, repo, path, head_sha=None):
-        """
-        :param owner:
-        :param repo:
-        :param path: file_path example: src/app/main.py
-        :param head_sha:
-        :return:
-        """
-        try:
-            path = GitHubRoutes.GET_FILE_CONTENT.value.format(owner=owner, repo=repo, path=path, head_sha=head_sha)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                return base64.b64decode(body.get("content", "")).decode("utf-8")
-
-            if status and status == 404:
-                logger.warning("File content not found for %s/%s#%s: status=%s body=%s",
-                               owner, repo, path, status, body)
-                return ""
-
-            # TODO check logs
-            logger.error("Failed to fetch PR file content for %s/%s#%s: status=%s body=%s",
-                         owner, repo, path, status, body)
-            raise ValueError(f"Failed to fetch PR file content for {owner}/{repo}#{path}: status={status}")
-
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while fetching PR file content for %s/%s#%s", owner, repo, path)
-            raise
-
-    def post_comment(self, owner, repo, issue_number, comment):
-        try:
-            path = GitHubRoutes.POST_COMMENT.value.format(owner=owner, repo=repo, issue_number=issue_number)
-            result = self.client.call_api(HTTPMethod.POST, path, json={"body": comment})
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                print(f"Successfully posted comment for {owner}/{repo}#{issue_number}: {comment}")
-                print(f"GitHub response: status={status} body={body}")
-                return body
-            # TODO check logs
-            logger.error("Failed to post comment for %s/%s#%s: status=%s body=%s",
-                         owner, repo, issue_number, status, body)
-            print(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status} body={body}")
-            raise ValueError(f"Failed to post comment for {owner}/{repo}#{issue_number}: status={status}")
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while posting comment for %s/%s#%s", owner, repo, issue_number)
-            raise
-
-    # TODO move owner, repo to class level attributes in class instantiations and remove from method params
-    def get_repository(self, owner, repo):
-        try:
-            path = GitHubRoutes.GET_REPOSITORY.value.format(owner=owner, repo=repo)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                print(f"Successfully retrieved repo details for {owner}/{repo}")
-                print(f"GitHub response: status={status} body={body}")
-                return body
-            # TODO check logs
-            logger.error("Failed to retrieve repo details for %s/%s: status=%s body=%s",
-                         owner, repo, status, body)
-            print(f"Failed to retrieve repo details for {owner}/{repo}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve repo details for {owner}/{repo}: status={status}")
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while retrieving repo details for %s/%s", owner, repo)
-            raise
-
-    def get_branch(self, owner, repo, branch):
-        try:
-            path = GitHubRoutes.GET_BRANCH.value.format(owner=owner, repo=repo, branch=branch)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                print(f"Successfully retrieved branch details for {owner}/{repo}/{branch}")
-                print(f"GitHub response: status={status} body={body}")
-                return body
-            # TODO check logs
-            logger.error("Failed to retrieve branch details for %s/%s/%s: status=%s body=%s",
-                         owner, repo, branch, status, body)
-            print(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve branch details for {owner}/{repo}/{branch}: status={status}")
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while retrieving branch details for %s/%s/%s", owner, repo, branch)
-            raise
-
-    def get_tree_recursive(self, owner, repo, tree_sha):
-        try:
-            path = GitHubRoutes.GET_TREE_RECURSIVE.value.format(owner=owner, repo=repo, tree_sha=tree_sha)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                print(f"Successfully retrieved tree details for {owner}/{repo}/{tree_sha}")
-                print(f"GitHub response: status={status} body={body}")
-                return body
-            # TODO check logs
-            logger.error("Failed to retrieve tree details for %s/%s/%s: status=%s body=%s",
-                         owner, repo, tree_sha, status, body)
-            print(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve tree details for {owner}/{repo}/{tree_sha}: status={status}")
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while retrieving tree details for %s/%s/%s", owner, repo, tree_sha)
-            raise
-
-    def get_blob_content(self, owner, repo, file_sha):
-        try:
-            path = GitHubRoutes.GET_BLOB_CONTENT.value.format(owner=owner, repo=repo, file_sha=file_sha)
-            result = self.client.call_api(HTTPMethod.GET, path)
-            status = result.get("status_code")
-            body = result.get("body")
-
-            if status and 200 <= status < 300:
-                print(f"Successfully retrieved blob content for {owner}/{repo}/{file_sha}")
-                print(f"GitHub response: status={status} body={body}")
-                return base64.b64decode(body.get("content", "")).decode("utf-8")
-            # TODO check logs
-            logger.error("Failed to retrieve blob content for %s/%s/%s: status=%s body=%s",
-                         owner, repo, file_sha, status, body)
-            print(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve blob content for {owner}/{repo}/{file_sha}: status={status}")
-        except Exception:
-            # TODO check logs
-            logger.exception("Error while retrieving blob content for %s/%s/%s", owner, repo, file_sha)
-            raise
+            files = self.get_pr_files(pr_number)
+            diff = ""
+            for file in files:
+                file_path = file.get("filename")
+                status = file.get("status")
+                patch = file.get("patch")
+                if not patch:
+                    continue
+                changed_lines = parse_new_lines(patch)
+                # TODO too many api calls if there are many files
+                file_lines = self.get_file_content(file_path, head_sha).split('\n')
+                if not file_lines:
+                    continue
+                for line in changed_lines:
+                    approx_line = line.get("line")
+                    target = line.get("content")
+                    line["line"] = get_new_file_line_number(file_lines, target, approx_line)
+                changed_lines = prepare_changed_lines_text(changed_lines)
+                diff += f"File: {file_path}\nStatus: {status}\nChanged lines:\n{changed_lines}\n\n"
+            return diff
+        except Exception as e:
+            logger.exception(f"Error while fetching PR diff for {self.owner}/{self.repo}#{pr_number}")
+            raise ValueError(f"Error while fetching PR diff for {self.owner}/{self.repo}#{pr_number}: {str(e)}")

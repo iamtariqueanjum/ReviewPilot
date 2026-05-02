@@ -10,20 +10,22 @@ from app.integrations.vectorstore.service import VectorStoreService
 
 class EmbeddingService(object):
 
-    def __init__(self, installation_id):
+    def __init__(self, owner, repo, installation_id):
+        self.owner = owner
+        self.repo = repo
         self.installation_id = installation_id
-        self.github_service = GithubService(installation_id)
+        self.github_service = GithubService(self.owner, self.repo, installation_id)
         self.vectorstore_service = VectorStoreService()
 
 
-    def create_repo_embeddings(self, owner, repo):
-        repo_details = self.github_service.get_repository(owner=owner, repo=repo)
+    def create_repo_embeddings(self):
+        repo_details = self.github_service.get_repository()
         default_branch = repo_details.get('default_branch', 'main')
-        branch_details = self.github_service.get_branch(owner=owner, repo=repo, branch=default_branch)
+        branch_details = self.github_service.get_branch(branch=default_branch)
         commit_sha = branch_details.get('commit', {}).get('sha')
         if not commit_sha:
-            raise ValueError(f"Could not find commit SHA for {owner}/{repo} default branch {default_branch}")
-        tree_details = self.github_service.get_tree_recursive(owner=owner, repo=repo, tree_sha=commit_sha)
+            raise ValueError(f"Could not find commit SHA for {self.owner}/{self.repo} default branch {default_branch}")
+        tree_details = self.github_service.get_tree_recursive(tree_sha=commit_sha)
         lang_extensions = { # TODO make this configurable
             "Python": ["py"],
             "Java": ["java"]
@@ -35,14 +37,14 @@ class EmbeddingService(object):
                 file_name = file_path.split('/')[-1]
                 file_extension = file_name.split('.')[-1]
                 file_sha = item.get('sha')
-                file_content = self.github_service.get_blob_content(owner=owner, repo=repo, file_sha=file_sha)
+                file_content = self.github_service.get_blob_content(file_sha=file_sha)
                 if file_extension not in ignore_files:
-                    print(f"Processing file: {file_path} with extension: {file_extension} for repo: {owner}/{repo}") # TODO replace with logger
+                    print(f"Processing file: {file_path} with extension: {file_extension} for repo: {self.owner}/{self.repo}") # TODO replace with logger
                     for language, extensions in lang_extensions.items():
                         print(f"Language {language}: {extensions}")
                         if file_extension in extensions:
                             splitter = SplitterFactory().get_splitter(language=language)
-                            payload = {'owner': owner, 'repo': repo, 'file_name': file_name,
+                            payload = {'owner': self.owner, 'repo': self.repo, 'file_name': file_name,
                                        'file_extension': file_extension, 'language': language, 'file_content': file_content,
                                        'file_path': file_path, 'commit_sha': commit_sha}
                             chunks = splitter.split(payload)
@@ -96,23 +98,10 @@ class EmbeddingService(object):
             chunk['updated_at'] = datetime.utcnow()
         return chunks
 
-    @staticmethod
-    def call_openai_embeddings(content):
-        from openai import OpenAI
-        client = OpenAI()
-        try:
-            response = client.embeddings.create(
-                model="text-embedding-3-large",  # TODO fetch from ConfigConstants
-                input=content
-            )
-        except Exception as e:
-            raise e
-        return response
-
-    def get_relevant_context(self, repo, file_paths):
+    def get_relevant_context(self, file_paths):
         filtered_chunks = []
         for file_path in file_paths:
-            filtered_chunks.append(self.vectorstore_service.filter_chunks_by_filepath(repo, file_path))
+            filtered_chunks.append(self.vectorstore_service.filter_chunks_by_filepath(self.repo, file_path))
         # TODO enhancement: add semantic search of files
         context = ""
         for filtered_chunk in filtered_chunks:
