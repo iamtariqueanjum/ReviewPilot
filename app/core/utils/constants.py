@@ -13,9 +13,15 @@ class GitHubWHAction(str, Enum):
     SYNCHRONIZE = "synchronize"
 
 
+class GitHubBot(str, Enum):
+    USERNAME = "reviewpilot-ai-bot"
+
+
 class GitHubWHEvent(str, Enum):
     INSTALLATION = "installation"
     PULL_REQUEST = "pull_request"
+    # PULL_REQUEST_REVIEW = "pull_request_review" # TODO inline review/chatbot
+    # PULL_REQUEST_REVIEW_COMMENT = "pull_request_review_comment" # TODO inline review/chatbot
     ISSUE_COMMENT = "issue_comment"
     PUSH = "push"
 
@@ -80,6 +86,7 @@ class ConfigConstants(str, Enum):
 class QueueConstants(str, Enum):
     REVIEW_PR_QUEUE = "review_pr_queue"
     CREATE_REPO_EMBEDDINGS_QUEUE = "create_repo_embeddings_queue"
+    CHAT_MESSAGES_QUEUE = "chat_messages_queue"
 
 
 class Language(str, Enum):

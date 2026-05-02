@@ -6,6 +6,6 @@ from app.core.services.embedding_service import EmbeddingService
                  name="app.workers.embedding_worker.create_repo_embeddings")
 def create_repo_embeddings(self, installation_id, owner, repo):
     print(f"[WORKER] Creating repo embeddings for owner: {owner} repo: {repo}") # TODO replace with logger
-    embedding_service = EmbeddingService(installation_id=installation_id)
-    embedding_service.create_repo_embeddings(owner, repo)
+    embedding_service = EmbeddingService(owner, repo, installation_id)
+    embedding_service.create_repo_embeddings()
     print(f"[WORKER] Repo embeddings done PR for owner: {owner} repo: {repo}") # TODO replace with logger

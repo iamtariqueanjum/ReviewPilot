@@ -62,7 +62,7 @@ class PullRequestEventHandler(object):
         #     method=HTTPMethod.POST,
         #     path=APIEndpoints.REVIEW_PR.value,
         #     json={"owner": owner, "repo": repo, "pr_number": pr_number, "head_sha": head_sha,
-        #           "installation_id": installation_id, "re_review": True}
+        #           "installation_id": installation_id}
         # )
         # print(f"API Call made - Review response: {response}\n")
 
