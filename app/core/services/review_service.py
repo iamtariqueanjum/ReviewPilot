@@ -19,7 +19,6 @@ class ReviewService(object):
         self.chain = prompt | self.structured_llm
 
     def review_pr(self, pr_number, head_sha):
-        # TODO exception handling
         pr_diff = self.github_service.get_pr_diff(pr_number, head_sha)
         print(f"PR Diff for {self.owner}/{self.repo}#{pr_number}:\n{pr_diff}\n")
         pr_filepaths = self.github_service.get_pr_filepaths(pr_number)

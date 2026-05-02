@@ -21,7 +21,7 @@ class IssueCommentEventHandler(object):
 
             if not result.is_safe:
                 reason = result.reason
-                print("Reason:", reason)
+                print("Query is unsafe... Reason:", reason)
                 return
 
             query = result.sanitized_input
