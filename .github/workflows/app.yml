@@ -2,9 +2,11 @@ name: Review Pilot CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - "**"
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - "**"
 
 permissions:
   contents: read
