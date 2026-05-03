@@ -35,7 +35,7 @@ class InputValidator:
             if re.search(pattern, user_input, re.IGNORECASE):
                 return ValidationResult(
                     is_safe=False,
-                    reason=f"Input contains potential prompt injection pattern"
+                    reason="Input contains potential prompt injection pattern"
                 )
         for pattern in self.PII_PATTERNS:
             if re.search(pattern, user_input):
@@ -57,4 +57,3 @@ class InputValidator:
         # Normalize whitespace
         user_input = re.sub(r"\s+", " ", user_input).strip()
         return user_input
-

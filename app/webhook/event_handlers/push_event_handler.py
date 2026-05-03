@@ -8,6 +8,5 @@ class PushEventHandler:
 
         if branch == default_branch:
             # TODO update repo embeddings with the new changes from the push
-            print(f"Push Event received on default branch... Updating latest repo embeddings....\n")
+            print("Push Event received on default branch... Updating latest repo embeddings....\n")
             # embedding_service.update_repo_embeddings(owner, repo)
-

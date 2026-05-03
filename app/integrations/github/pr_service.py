@@ -59,7 +59,8 @@ class PrService:
             # TODO check logs
             logger.error("Failed to fetch PR file details for %s/%s#%s: status=%s body=%s",
                          self.owner, self.repo, pr_number, status, body)
-            raise ValueError(f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status}")
+            raise ValueError(
+                f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status}")
 
         except Exception:
             # TODO check logs

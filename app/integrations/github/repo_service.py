@@ -54,8 +54,8 @@ class RepoService:
             # TODO check logs
             logger.error("Failed to retrieve branch details for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, branch, status, body)
-            print(f"Failed to retrieve branch details for {self.owner}/{self.repo}/{branch}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve branch details for {self.owner}/{self.repo}/{branch}: status={status}")
+            raise ValueError(
+                f"Failed to retrieve branch details for {self.owner}/{self.repo}/{branch}: status={status}")
         except Exception:
             # TODO check logs
             logger.exception("Error while retrieving branch details for %s/%s/%s", self.owner, self.repo, branch)
@@ -79,8 +79,8 @@ class RepoService:
             # TODO check logs
             logger.error("Failed to retrieve tree details for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, tree_sha, status, body)
-            print(f"Failed to retrieve tree details for {self.owner}/{self.repo}/{tree_sha}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve tree details for {self.owner}/{self.repo}/{tree_sha}: status={status}")
+            raise ValueError(
+                f"Failed to retrieve tree details for {self.owner}/{self.repo}/{tree_sha}: status={status}")
         except Exception:
             # TODO check logs
             logger.exception("Error while retrieving tree details for %s/%s/%s", self.owner, self.repo, tree_sha)
@@ -93,7 +93,8 @@ class RepoService:
         :return:
         """
         try:
-            path = GitHubRoutes.GET_FILE_CONTENT.value.format(owner=self.owner, repo=self.repo, path=path, head_sha=head_sha)
+            path = GitHubRoutes.GET_FILE_CONTENT.value.format(
+                owner=self.owner, repo=self.repo, path=path, head_sha=head_sha)
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
@@ -134,8 +135,8 @@ class RepoService:
             # TODO check logs
             logger.error("Failed to retrieve blob content for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, file_sha, status, body)
-            print(f"Failed to retrieve blob content for {self.owner}/{self.repo}/{file_sha}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve blob content for {self.owner}/{self.repo}/{file_sha}: status={status}")
+            raise ValueError(
+                f"Failed to retrieve blob content for {self.owner}/{self.repo}/{file_sha}: status={status}")
         except Exception:
             # TODO check logs
             logger.exception("Error while retrieving blob content for %s/%s/%s", self.owner, self.repo, file_sha)

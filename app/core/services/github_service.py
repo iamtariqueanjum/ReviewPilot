@@ -48,8 +48,9 @@ class GithubService:
                 filepaths.append(file.get("filename"))
             return filepaths
         except Exception as e:
-            logger.exception(f"Error while fetching PR file paths for {self.owner}/{self.repo}#{pr_number}")
-            raise ValueError(f"Error while fetching PR file paths for {self.owner}/{self.repo}#{pr_number}: {str(e)}")
+            logger.exception("Error while fetching PR file paths for %s/%s#%s", self.owner, self.repo, pr_number)
+            raise ValueError(
+                f"Error while fetching PR file paths for {self.owner}/{self.repo}#{pr_number}: {str(e)}") from e
 
     def get_pr_diff(self, pr_number, head_sha):
         try:
@@ -74,5 +75,6 @@ class GithubService:
                 diff += f"File: {file_path}\nStatus: {status}\nChanged lines:\n{changed_lines}\n\n"
             return diff
         except Exception as e:
-            logger.exception(f"Error while fetching PR diff for {self.owner}/{self.repo}#{pr_number}")
-            raise ValueError(f"Error while fetching PR diff for {self.owner}/{self.repo}#{pr_number}: {str(e)}")
+            logger.exception("Error while fetching PR diff for %s/%s#%s", self.owner, self.repo, pr_number)
+            raise ValueError(
+                f"Error while fetching PR diff for {self.owner}/{self.repo}#{pr_number}: {str(e)}") from e

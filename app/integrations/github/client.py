@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import requests
 import time
+import requests
 
 from requests.exceptions import HTTPError
 
@@ -58,12 +58,12 @@ class GitHubClient:
             except ValueError:
                 response["body"] = resp.text
         except HTTPError as err:
-            logger.exception(f"Error while calling API : {str(err)}: {method} {path}")
+            logger.exception("Error while calling API %s %s: %s", method, path, str(err))
             resp = getattr(err, 'response', None)
             if resp is not None:
                 try:
                     response = {"status_code": resp.status_code, "body": resp.json()}
-                except Exception as e:
+                except Exception as _:
                     response = {"status_code": resp.status_code, "body": getattr(resp, 'text', None)}
         print(f"API call: {method} {path} response: {response}")
         return response

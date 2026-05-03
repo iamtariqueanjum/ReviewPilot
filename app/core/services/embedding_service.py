@@ -71,7 +71,7 @@ class EmbeddingService:
                 result = chain.invoke({"code": code}) # TODO Batch processing optimisation
                 chunk['summary'] = result.content
             except Exception as e:
-                print(f"Error generating summary for chunk: {chunk.get('chunk_id')}, error: {str(e)}") # TODO replace with logger
+                logger.error("[WORKER] Failed to generate code summary for chunk %s: %s", chunk.get('chunk_id'), str(e))
                 chunk['summary'] = "Summary not available"
                 # TODO add retry mechanism and Handle Partial Failures
         return chunks

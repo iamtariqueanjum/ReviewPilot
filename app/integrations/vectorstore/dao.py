@@ -1,5 +1,6 @@
 from qdrant_client.models import VectorParams, Distance
 
+from app.core.logger import logger
 from app.core.utils.constants import VectorStore
 from app.integrations.vectorstore.client import QdrantClientWrapper
 
@@ -12,7 +13,7 @@ class VectorStoreDao:
         self.vector_size = VectorStore.VECTOR_SIZE.value
 
     def create_collection(self):
-        print(f"CREATING COLLECTION: {self.collection}")
+        logger.info("Creating Collection: %s with vector size: %s", self.collection, self.vector_size)
         try:
             response = self.client.create_collection(
                 collection_name=self.collection,
@@ -21,15 +22,15 @@ class VectorStoreDao:
                     distance=Distance.COSINE
                 ))
         except Exception as e:
-            # TODO loggger
+            logger.exception("Error while creating collection %s: %s", self.collection, str(e))
             return None
         return response
 
     def delete_collection(self):
-        print(f"DELETING COLLECTION: {self.collection}")
+        logger.info("Deleting Collection: %s", self.collection)
         try:
             response = self.client.delete_collection(collection_name=self.collection)
         except Exception as e:
-            # TODO loggger
+            logger.exception("Error while deleting collection %s: %s", self.collection, str(e))
             return None
         return response
