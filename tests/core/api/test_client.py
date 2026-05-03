@@ -1,4 +1,6 @@
 """Unit tests for API Client."""
+from dotenv import load_dotenv
+load_dotenv(".env.test")
 
 import pytest
 from unittest.mock import MagicMock, patch, Mock
