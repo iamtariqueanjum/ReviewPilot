@@ -26,6 +26,15 @@ jobs:
           pip install pylint pytest pytest-cov flake8
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Cache Python packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Lint with pylint (fail if score < 8.0)
         run: |
           pylint $(git ls-files '*.py') --fail-under=8.0
