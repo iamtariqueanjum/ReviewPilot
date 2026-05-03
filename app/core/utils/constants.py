@@ -81,6 +81,7 @@ class ConfigConstants(str, Enum):
     INTERNAL_API = settings.INTERNAL_API
     CELERY_BROKER_URL = settings.CELERY_BROKER_URL
     CELERY_BACKEND_URL = settings.CELERY_BACKEND_URL
+    REDIS_BACKEND_URL = settings.REDIS_BACKEND_URL
 
 
 class QueueConstants(str, Enum):

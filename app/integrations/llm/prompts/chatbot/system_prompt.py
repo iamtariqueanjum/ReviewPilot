@@ -20,5 +20,4 @@ You will be provide with:
 - PR diff
 - Repo Context
     - Use ONLY when PR diff alone is insufficient to answer.
-
 """

@@ -23,6 +23,7 @@ class ConfigSettings(BaseSettings):
     INTERNAL_API: str = Field(..., env="INTERNAL_API")
     CELERY_BROKER_URL: str = Field(..., env="CELERY_BROKER_URL")
     CELERY_BACKEND_URL: str = Field(..., env="CELERY_BACKEND_URL")
+    REDIS_BACKEND_URL: str = Field(..., env="REDIS_BACKEND_URL")
 
     class Config:
         env_file = ".env"
