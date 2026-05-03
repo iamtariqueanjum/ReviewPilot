@@ -1,3 +1,5 @@
+import hashlib
+
 from app.core.api.models.chatbot_response import ChatbotResponse
 from app.core.services.embedding_service import EmbeddingService
 from app.core.services.github_service import GithubService
@@ -22,6 +24,9 @@ class ChatbotService:
         pr_diff = self.github_service.get_pr_diff(pr_number, pr_details.get("head", {}).get("sha"))
         pr_filepaths = self.github_service.get_pr_filepaths(pr_number)
         context = self.embedding_service.get_relevant_context(pr_filepaths)
+        conversation_id = hashlib.sha256(
+            f"{self.repo}:pr:{pr_number}".encode()
+        ).hexdigest()[:16]
         # TODO exception handling
         llm_response = self.chain.invoke(
             {"pr_diff": pr_diff, "context": context, "query": query}
