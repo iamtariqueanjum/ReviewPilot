@@ -1,5 +1,5 @@
 from app.core.api.client import APIClient
-from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod, QueueConstants
+from app.core.utils.constants import GitHubWHAction, QueueConstants
 from app.workers.review_worker import review_pr
 
 
