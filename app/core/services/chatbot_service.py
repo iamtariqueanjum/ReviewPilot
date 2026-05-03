@@ -32,6 +32,6 @@ class ChatbotService:
             {"input": USER_PROMPT.format(pr_diff=pr_diff, context=context, query=query), "system_prompt": SYSTEM_PROMPT},
             config={"configurable": {"session_id": self.conversation_id}}
         )
-        response  = f"""@{sender} {llm_response}"""
+        response  = f"""@{sender} {llm_response.content}"""
         self.github_service.post_comment(self.pr_number, response)
         return {"message": "Query answer comment posted successfully", "status": "success"}
