@@ -5,7 +5,7 @@ from app.core.services.chatbot_service import ChatbotService
                  name="app.workers.chatbot_worker.process_chat_message")
 def process_chat_message(self, installation_id, owner, repo, pr_number, sender, query):
     print(f"[WORKER] Answering user query") # TODO replace with logger
-    chatbot_service = ChatbotService(owner, repo, pr_number, installation_id)
+    chatbot_service = ChatbotService(owner, repo, pr_number, installation_id=installation_id)
     response = chatbot_service.process_query(sender, query)
     print(f"[WORKER] Answered user query") # TODO replace with logger
     return response

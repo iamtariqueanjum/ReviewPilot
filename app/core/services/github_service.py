@@ -6,7 +6,7 @@ from app.integrations.github.repo_service import RepoService
 from app.integrations.github.comment_service import CommentService
 
 
-class GithubService(object):
+class GithubService:
 
     def __init__(self, owner, repo, installation_id):
         self.owner = owner

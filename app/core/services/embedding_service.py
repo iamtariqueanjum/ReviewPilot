@@ -1,14 +1,16 @@
 from datetime import datetime
 
 from langchain_core.prompts import ChatPromptTemplate
+from openai import OpenAI
 
+from app.core.logger import logger
 from app.core.services.github_service import GithubService
 from app.core.chunking.splitter_factory import SplitterFactory
 from app.integrations.llm.llm_factory import LLMFactory
 from app.integrations.vectorstore.service import VectorStoreService
 
 
-class EmbeddingService(object):
+class EmbeddingService:
 
     def __init__(self, owner, repo, installation_id):
         self.owner = owner
@@ -16,7 +18,6 @@ class EmbeddingService(object):
         self.installation_id = installation_id
         self.github_service = GithubService(self.owner, self.repo, installation_id)
         self.vectorstore_service = VectorStoreService()
-
 
     def create_repo_embeddings(self):
         repo_details = self.github_service.get_repository()
@@ -30,30 +31,30 @@ class EmbeddingService(object):
             "Python": ["py"],
             "Java": ["java"]
         }
-        ignore_files = [".git", "__pycache__", ".venv", "LICENSE", "md"]  # TODO make this configurable for all languages
+        # TODO make this configurable for all languages
+        ignore_files = [".git", "__pycache__", ".venv", "LICENSE", "md"]
         for item in tree_details.get('tree', []):
-            if item.get('type') == 'blob' and item.get('size', 0) < 100000:  # TODO make this configurable < 100KB. Make blob a constant
-                file_path = item.get('path') # app/core/services/review_service.py
+            # TODO make this configurable < 100KB. Make blob a constant
+            if item.get('type') == 'blob' and item.get('size', 0) < 100000:
+                file_path = item.get('path')
                 file_name = file_path.split('/')[-1]
                 file_extension = file_name.split('.')[-1]
                 file_sha = item.get('sha')
                 file_content = self.github_service.get_blob_content(file_sha=file_sha)
                 if file_extension not in ignore_files:
-                    print(f"Processing file: {file_path} with extension: {file_extension} for repo: {self.owner}/{self.repo}") # TODO replace with logger
+                    logger.info("[WORKER] Processing file %s with extension: %s for repo: %s/%s",
+                                file_path, file_extension, self.owner, self.repo)
                     for language, extensions in lang_extensions.items():
-                        print(f"Language {language}: {extensions}")
                         if file_extension in extensions:
                             splitter = SplitterFactory().get_splitter(language=language)
                             payload = {'owner': self.owner, 'repo': self.repo, 'file_name': file_name,
-                                       'file_extension': file_extension, 'language': language, 'file_content': file_content,
-                                       'file_path': file_path, 'commit_sha': commit_sha}
+                                       'file_extension': file_extension, 'language': language,
+                                       'file_content': file_content, 'file_path': file_path, 'commit_sha': commit_sha}
                             chunks = splitter.split(payload)
                             if not chunks:
                                 continue
-                            # chunks = self.generate_code_summaries(chunks) # TODO move this to async flow after insertion
-                            print(f"FUNKY Generated chunks before embeddings\n{chunks}\n")
+                            # chunks = self.generate_code_summaries(chunks) # TODO move this to async flow after insert
                             chunks = self.generate_embeddings(chunks)
-                            print(f"FUNKY Generated chunks after embeddings\n{chunks}\n")
                             self.vectorstore_service.upsert_chunks(chunks)
 
 
@@ -78,7 +79,6 @@ class EmbeddingService(object):
 
     @staticmethod
     def call_openai_embeddings(content):
-        from openai import OpenAI
         client = OpenAI()
         try:
             response = client.embeddings.create(
