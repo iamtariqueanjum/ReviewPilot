@@ -1,9 +1,11 @@
+from fastapi import HTTPException
+
 from app.core.api.client import APIClient
-from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod, QueueConstants
+from app.core.utils.constants import GitHubWHAction, QueueConstants
 from app.workers.review_worker import review_pr
 
 
-class PullRequestEventHandler(object):
+class PullRequestEventHandler:
 
     def __init__(self):
         self.api_client = APIClient()
@@ -32,8 +34,10 @@ class PullRequestEventHandler(object):
         REQUIRED_FIELDS = [installation_id, owner, repo, pr_number, head_sha]
         for field in REQUIRED_FIELDS:
             if not field:
-                print(f"Required field {field} not found in payload\n")
-                return False, f"Required field {field} not found in payload" # TODO raise 400
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Required field {field} is missing in payload",
+                )
         return installation_id, owner, repo, pr_number, head_sha
 
     def on_opened(self, payload):
@@ -84,5 +88,5 @@ class PullRequestEventHandler(object):
         repo = payload.get("repository").get("name")
         if payload.get("pull_request", {}).get("merged"):
             # TODO update repo embeddings with the new changes from the merged PR
-            print(f"Pull request has been merged... Updating repo embeddings....\n")
+            print("Pull request has been merged... Updating repo embeddings....\n")
             self.embedding_service.update_repo_embeddings(owner, repo)

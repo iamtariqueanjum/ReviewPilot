@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from app.core.utils.constants import ConfigConstants, LLMProvider
 
 
-class LLMFactory(object):
+class LLMFactory:
 
     @staticmethod
     def get_llm(provider: str):
@@ -15,6 +15,7 @@ class LLMFactory(object):
         if provider == LLMProvider.OPENAI:
             return ChatOpenAI(model=ConfigConstants.OPENAI_BASE_MODEL)
         # elif provider == LLMProvider.GOOGLE:
-            # return ChatGoogleGenerativeAI(model=ConfigConstants.GEMINI_BASE_MODEL, api_key=ConfigConstants.GEMINI_API_KEY)
+        #    return ChatGoogleGenerativeAI(
+        # model=ConfigConstants.GEMINI_BASE_MODEL, api_key=ConfigConstants.GEMINI_API_KEY)
 
         raise ValueError(f"Unsupported LLM provider: {provider}")

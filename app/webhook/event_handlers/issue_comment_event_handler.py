@@ -3,7 +3,7 @@ from app.core.utils.input_validator import InputValidator
 from app.workers.chatbot_worker import process_chat_message
 
 
-class IssueCommentEventHandler(object):
+class IssueCommentEventHandler:
 
     def __init__ (self):
         self.validator = InputValidator()

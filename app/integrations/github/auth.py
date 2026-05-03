@@ -13,7 +13,7 @@ def generate_jwt() -> str:
     if not GITHUB_APP_ID or not GITHUB_PRIVATE_KEY_PATH:
         raise EnvironmentError("GITHUB_APP_ID and GITHUB_PRIVATE_KEY_PATH must be set in environment")
 
-    with open(GITHUB_PRIVATE_KEY_PATH, "r") as f:
+    with open(GITHUB_PRIVATE_KEY_PATH, "r", encoding="utf-8") as f:
         signing_key = f.read()
 
     now = int(time.time())

@@ -4,7 +4,7 @@ from app.integrations.github.client import GitHubClient
 from app.integrations.github.repo_service import RepoService
 
 
-class PrService(object):
+class PrService:
 
     def __init__(self, owner, repo, client: GitHubClient):
         self.owner = owner
@@ -59,7 +59,8 @@ class PrService(object):
             # TODO check logs
             logger.error("Failed to fetch PR file details for %s/%s#%s: status=%s body=%s",
                          self.owner, self.repo, pr_number, status, body)
-            raise ValueError(f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status}")
+            raise ValueError(
+                f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status}")
 
         except Exception:
             # TODO check logs

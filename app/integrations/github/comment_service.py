@@ -3,7 +3,7 @@ from app.core.utils.constants import GitHubRoutes, HTTPMethod
 from app.integrations.github.client import GitHubClient
 
 
-class CommentService(object):
+class CommentService:
 
     def __init__(self, owner, repo, client: GitHubClient):
         self.owner = owner

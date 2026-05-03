@@ -35,9 +35,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Lint with pylint (fail if score < 8.0)
+      - name: Lint with pylint (fail if score < 9.0)
         run: |
-          pylint $(git ls-files '*.py') --fail-under=8.0
+          pylint $(git ls-files '*.py') --fail-under=9.0
 
       - name: Lint with flake8
         run: |
