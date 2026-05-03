@@ -23,6 +23,7 @@ class ChatbotService:
 
 
     def process_query(self, sender, query):
+        # TODO enhancmenet - Fetch pr_diff and context only if needed
         pr_details = self.github_service.get_pr(self.pr_number)
         pr_diff = self.github_service.get_pr_diff(self.pr_number, pr_details.get("head", {}).get("sha"))
         pr_filepaths = self.github_service.get_pr_filepaths(self.pr_number)
