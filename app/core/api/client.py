@@ -8,7 +8,8 @@ from app.core.logger import logger
 from app.core.utils.constants import ConfigConstants
 
 
-class APIClient(object):
+class APIClient:
+    """Class representing a client to call internal APIs with retry mechanism and error handling."""
 
     def __init__(self, retries=3, timeout=60):
         self.base_url = ConfigConstants.INTERNAL_API.value
@@ -16,8 +17,8 @@ class APIClient(object):
         self.retry_strategy = Retry(
             total=retries,
             backoff_factor=0.3,
-            status_forcelist=[429, 500, 502, 503, 504], # TODO add other statuses if needed
-            allowed_methods=["GET", "POST"], # TODO add other methods if needed
+            status_forcelist=[408, 409, 429, 500, 502, 503, 504],
+            allowed_methods=["GET", "PUT", "DELETE"],
         )
         self.timeout = timeout
         self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
@@ -28,16 +29,16 @@ class APIClient(object):
         }
 
 
-    def request(self, method, path, params=None, json=None, data=None, timeout=60, headers=None):
+    def request(self, method, path, **kwargs):
         url = f"{self.base_url}{path}"
         resp = self.session.request(
             method=method.upper(),
             url=url,
-            params=params,
-            json=json,
-            data=data,
-            headers=headers or self.headers,
-            timeout=timeout
+            params=kwargs.get('params'),
+            json=kwargs.get('json'),
+            data=kwargs.get('data'),
+            headers=kwargs.get('headers') or self.headers,
+            timeout=kwargs.get('timeout') or self.timeout
         )
         return resp
 
@@ -51,12 +52,11 @@ class APIClient(object):
             except ValueError:
                 response["body"] = resp.text
         except HTTPError as err:
-            logger.exception(f"Error while calling API : {str(err)}: {method} {path}")
+            logger.exception("Error while calling API : %s", str(err))
             resp = getattr(err, 'response', None)
             if resp is not None:
                 try:
                     response = {"status_code": resp.status_code, "body": resp.json()}
-                except Exception as e:
+                except Exception as _:
                     response = {"status_code": resp.status_code, "body": getattr(resp, 'text', None)}
-        print(f"API call: {method} {path} response: {response}")
         return response
