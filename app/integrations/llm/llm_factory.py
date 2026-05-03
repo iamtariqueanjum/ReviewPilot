@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from app.core.utils.constants import ConfigConstants, LLMProvider
 
 
-class LLMFactory(object):
+class LLMFactory:
 
     @staticmethod
     def get_llm(provider: str):

@@ -3,7 +3,7 @@ from app.core.utils.constants import GitHubWHAction, APIEndpoints, HTTPMethod, Q
 from app.workers.review_worker import review_pr
 
 
-class PullRequestEventHandler(object):
+class PullRequestEventHandler:
 
     def __init__(self):
         self.api_client = APIClient()

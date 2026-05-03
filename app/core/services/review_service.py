@@ -6,7 +6,7 @@ from app.integrations.llm.response_formatter import get_markdown_review_comment
 from app.core.services.github_service import GithubService
 
 
-class ReviewService(object):
+class ReviewService:
 
     def __init__(self, owner, repo, installation_id, provider=None):
         self.owner = owner

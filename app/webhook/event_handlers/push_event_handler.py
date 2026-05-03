@@ -1,6 +1,6 @@
 
 
-class PushEventHandler(object):
+class PushEventHandler:
 
     def handle(self, payload):
         branch = payload.get("ref").replace("refs/heads/", "")

@@ -13,7 +13,7 @@ from app.integrations.github.auth import generate_jwt
 from app.core.logger import logger
 
 
-class GitHubClient(object):
+class GitHubClient:
     _token_cache = {} # TODO move to Redis
 
     def __init__(self, installation_id, retries=3, timeout=60):

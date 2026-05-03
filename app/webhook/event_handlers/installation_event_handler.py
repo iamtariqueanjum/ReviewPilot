@@ -2,7 +2,7 @@ from app.core.utils.constants import GitHubWHAction, QueueConstants
 from app.workers.embeddings_worker import create_repo_embeddings
 
 
-class InstallationEventHandler(object):
+class InstallationEventHandler:
 
     def handle(self, payload):
         action = payload.get("action")

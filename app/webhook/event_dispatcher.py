@@ -6,7 +6,7 @@ from app.webhook.event_handlers.pull_request_event_handler import PullRequestEve
 from app.webhook.event_handlers.push_event_handler import PushEventHandler
 
 
-class WebhookEventDispatcher(object):
+class WebhookEventDispatcher:
 
     def __init__(self):
         self.handlers = {

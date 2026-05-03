@@ -4,7 +4,7 @@ from app.integrations.github.client import GitHubClient
 from app.integrations.github.repo_service import RepoService
 
 
-class PrService(object):
+class PrService:
 
     def __init__(self, owner, repo, client: GitHubClient):
         self.owner = owner
