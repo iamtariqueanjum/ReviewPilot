@@ -1,5 +1,5 @@
 [MASTER]
-ignore=tests
+ignore-patterns=tests/.*
 [FORMAT]
 max-line-length=121
 [MESSAGES CONTROL]
