@@ -1,3 +1,5 @@
+[MASTER]
+ignore=tests
 [FORMAT]
 max-line-length=121
 [MESSAGES CONTROL]
