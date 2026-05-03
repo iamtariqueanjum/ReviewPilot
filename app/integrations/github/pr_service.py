@@ -33,7 +33,7 @@ class PrService(object):
 
         except Exception:
             # TODO check logs
-            logger.exception("Error while fetching PR details for %s/%s#%s", owner, repo, pr_number)
+            logger.exception("Error while fetching PR details for %s/%s#%s", self.owner, self.repo, pr_number)
             raise
 
 
