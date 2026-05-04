@@ -10,7 +10,7 @@ class PullRequestEventHandler:
 
     def __init__(self):
         self.api_client = APIClient()
-        # self.embedding_service = None
+        self.embedding_service = None
 
     def handle(self, payload):
         action = payload.get("action")
@@ -78,4 +78,4 @@ class PullRequestEventHandler:
             # TODO update repo embeddings with the new changes from the merged PR
             logger.info("Pull request merged owner: %s repo : %s", owner, repo)
             logger.info("Updating repo embeddings : %s", owner, repo)
-            # self.embedding_service.update_repo_embeddings(owner, repo)
+            self.embedding_service.update_repo_embeddings(owner, repo)
