@@ -1,0 +1,110 @@
+services:
+
+  # ── FastAPI App ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: reviewpilot_api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app                        # Hot reload in dev
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - reviewpilot_net
+
+  # ── Celery Worker ───────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: reviewpilot_worker
+    command: >
+      celery -A app.core.celery_app.celery_app worker
+      -Q review_pr_queue,create_repo_embeddings_queue,chat_messages_queue
+      --loglevel=info
+      --concurrency=4
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - reviewpilot_net
+
+  # ── Celery Flower (Queue Monitor) ───────────────────────────────────────────
+  flower:
+    image: mher/flower:2.0
+    container_name: reviewpilot_flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - worker
+    restart: unless-stopped
+    networks:
+      - reviewpilot_net
+
+  # ── Redis (Broker + Backend) ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: reviewpilot_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes   # Persist data across restarts
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - reviewpilot_net
+
+  # ── Qdrant (Vector DB) ──────────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: reviewpilot_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"   # gRPC port
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    networks:
+      - reviewpilot_net
+
+
+# ── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
+  qdrant_data:
+
+
+# ── Network ──────────────────────────────────────────────────────────────────
+networks:
+  reviewpilot_net:
+    driver: bridge

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git
+.git/
+.gitignore
+
+# Secrets (never bake into image)
+.env
+*.env
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Docs
+*.md
+LICENSE
+
+# Docker files themselves
+Dockerfile*
+docker-compose*
