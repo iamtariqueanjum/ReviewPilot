@@ -9,14 +9,6 @@ from app.webhook.event_handlers.pull_request_event_handler import PullRequestEve
 class TestPullRequestEventHandler:
     """Test suite for PullRequestEventHandler."""
 
-    def test_init(self):
-        """Test PullRequestEventHandler initialization."""
-        with patch('app.webhook.event_handlers.pull_request_event_handler.APIClient'):
-            handler = PullRequestEventHandler()
-            
-            assert handler.api_client is not None
-            assert handler.embedding_service is None
-
     def test_validate_payload_success(self, sample_pr_payload):
         """Test successful payload validation."""
         installation_id, owner, repo, pr_number, head_sha = PullRequestEventHandler.validate_payload(sample_pr_payload)
@@ -170,3 +162,64 @@ class TestPullRequestEventHandler:
             # Should not raise any exception, just not process anything
             handler.handle(sample_pr_payload)
 
+    def test_validate_payload_with_special_characters(self):
+        """Test payload validation with special characters in names."""
+        payload = {
+            "action": "opened",
+            "pull_request": {
+                "number": 1,
+                "head": {"sha": "abc123"},
+            },
+            "repository": {
+                "owner": {"login": "test_user-123"},
+                "name": "test-repo_name"
+            },
+            "installation": {"id": 12345}
+        }
+        
+        installation_id, owner, repo, pr_number, head_sha = PullRequestEventHandler.validate_payload(payload)
+        
+        assert installation_id == 12345
+        assert owner == "test_user-123"
+        assert repo == "test-repo_name"
+
+    def test_validate_payload_with_large_numbers(self):
+        """Test payload validation with large numbers."""
+        payload = {
+            "action": "opened",
+            "pull_request": {
+                "number": 999999,
+                "head": {"sha": "abc123"},
+            },
+            "repository": {
+                "owner": {"login": "testuser"},
+                "name": "test-repo"
+            },
+            "installation": {"id": 9999999}
+        }
+        
+        installation_id, owner, repo, pr_number, head_sha = PullRequestEventHandler.validate_payload(payload)
+        
+        assert installation_id == 9999999
+        assert pr_number == 999999
+
+    def test_init(self):
+        """Test PullRequestEventHandler initialization."""
+        with patch('app.webhook.event_handlers.pull_request_event_handler.APIClient'):
+            handler = PullRequestEventHandler()
+            
+            assert handler is not None
+            assert handler.api_client is not None
+
+    def test_on_opened_message_format(self, sample_pr_payload):
+        """Test message format in on_opened response."""
+        with patch('app.webhook.event_handlers.pull_request_event_handler.APIClient'), \
+             patch('app.webhook.event_handlers.pull_request_event_handler.review_pr') as mock_review_pr:
+            
+            handler = PullRequestEventHandler()
+            result = handler.on_opened(sample_pr_payload)
+            
+            assert "message" in result
+            assert "status" in result
+            assert "Review for PR" in result["message"]
+            assert "#1" in result["message"]

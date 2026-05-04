@@ -129,3 +129,128 @@ class TestGithubService:
             assert result is not None
             mock_comment_service.post_comment.assert_called_once_with(1, "Test comment")
 
+    def test_get_pr(self, mock_github_client):
+        """Test getting PR details."""
+        mock_pr_service = MagicMock()
+        mock_pr_service.get_pr.return_value = {"number": 1, "title": "Test PR"}
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService', return_value=mock_pr_service), \
+             patch('app.core.services.github_service.RepoService'), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.pr_service = mock_pr_service
+            
+            pr = service.get_pr(1)
+            
+            assert pr["number"] == 1
+            assert pr["title"] == "Test PR"
+
+    def test_get_repository(self, mock_github_client):
+        """Test getting repository details."""
+        mock_repo_service = MagicMock()
+        mock_repo_service.get_repository.return_value = {"name": "test-repo", "default_branch": "main"}
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService'), \
+             patch('app.core.services.github_service.RepoService', return_value=mock_repo_service), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.repo_service = mock_repo_service
+            
+            repo = service.get_repository()
+            
+            assert repo["name"] == "test-repo"
+            assert repo["default_branch"] == "main"
+
+    def test_get_branch(self, mock_github_client):
+        """Test getting branch details."""
+        mock_repo_service = MagicMock()
+        mock_repo_service.get_branch.return_value = {"name": "main", "commit": {"sha": "abc123"}}
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService'), \
+             patch('app.core.services.github_service.RepoService', return_value=mock_repo_service), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.repo_service = mock_repo_service
+            
+            branch = service.get_branch("main")
+            
+            assert branch["name"] == "main"
+
+    def test_get_file_content(self, mock_github_client):
+        """Test getting file content."""
+        mock_repo_service = MagicMock()
+        mock_repo_service.get_file_content.return_value = "def hello():\n    print('hello')"
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService'), \
+             patch('app.core.services.github_service.RepoService', return_value=mock_repo_service), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.repo_service = mock_repo_service
+            
+            content = service.get_file_content("test.py", "abc123")
+            
+            assert "def hello()" in content
+
+    def test_get_tree_recursive(self, mock_github_client):
+        """Test getting tree recursively."""
+        mock_repo_service = MagicMock()
+        mock_repo_service.get_tree_recursive.return_value = {
+            "tree": [
+                {"path": "file1.py", "type": "blob"},
+                {"path": "dir/", "type": "tree"}
+            ]
+        }
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService'), \
+             patch('app.core.services.github_service.RepoService', return_value=mock_repo_service), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.repo_service = mock_repo_service
+            
+            tree = service.get_tree_recursive("abc123")
+            
+            assert len(tree["tree"]) == 2
+
+    def test_get_blob_content(self, mock_github_client):
+        """Test getting blob content."""
+        mock_repo_service = MagicMock()
+        mock_repo_service.get_blob_content.return_value = "blob content"
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService'), \
+             patch('app.core.services.github_service.RepoService', return_value=mock_repo_service), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.repo_service = mock_repo_service
+            
+            content = service.get_blob_content("blob123")
+            
+            assert content == "blob content"
+
+    def test_get_pr_filepaths_empty(self, mock_github_client):
+        """Test getting PR filepaths when PR has no changes."""
+        mock_pr_service = MagicMock()
+        mock_pr_service.get_pr_files.return_value = []
+        
+        with patch('app.core.services.github_service.GitHubClient', return_value=mock_github_client), \
+             patch('app.core.services.github_service.PrService', return_value=mock_pr_service), \
+             patch('app.core.services.github_service.RepoService'), \
+             patch('app.core.services.github_service.CommentService'):
+            
+            service = GithubService("testuser", "test-repo", 12345)
+            service.pr_service = mock_pr_service
+            
+            filepaths = service.get_pr_filepaths(1)
+            
+            assert filepaths == []
