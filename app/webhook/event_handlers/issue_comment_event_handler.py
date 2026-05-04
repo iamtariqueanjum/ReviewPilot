@@ -1,5 +1,6 @@
 from app.core.utils.constants import GitHubWHAction, GitHubBot, QueueConstants
 from app.core.utils.input_validator import InputValidator
+from app.webhook.logger import logger
 from app.workers.chatbot_worker import process_chat_message
 
 
@@ -21,7 +22,7 @@ class IssueCommentEventHandler:
 
             if not result.is_safe:
                 reason = result.reason
-                print("Query is unsafe... Reason:", reason)
+                logger.error("LLM call is ignored as comment is unsafe due to %s", reason)
                 return
 
             query = result.sanitized_input
@@ -42,4 +43,4 @@ class IssueCommentEventHandler:
                 retry=True,
                 queue=QueueConstants.CHAT_MESSAGES_QUEUE
             )
-            print(f"Query pushed to queue {query_id}\n")
+            logger.info("Query pushed to queue query_id: %s", query_id)

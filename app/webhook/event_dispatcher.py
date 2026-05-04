@@ -3,7 +3,6 @@ from app.core.utils.constants import GitHubWHEvent
 from app.webhook.event_handlers.installation_event_handler import InstallationEventHandler
 from app.webhook.event_handlers.issue_comment_event_handler import IssueCommentEventHandler
 from app.webhook.event_handlers.pull_request_event_handler import PullRequestEventHandler
-from app.webhook.event_handlers.push_event_handler import PushEventHandler
 
 
 class WebhookEventDispatcher:
@@ -12,8 +11,7 @@ class WebhookEventDispatcher:
         self.handlers = {
             GitHubWHEvent.PULL_REQUEST: PullRequestEventHandler(),
             GitHubWHEvent.INSTALLATION: InstallationEventHandler(),
-            GitHubWHEvent.ISSUE_COMMENT: IssueCommentEventHandler(),
-            GitHubWHEvent.PUSH: PushEventHandler()
+            GitHubWHEvent.ISSUE_COMMENT: IssueCommentEventHandler()
         }
 
     def dispatch(self, event, payload):
