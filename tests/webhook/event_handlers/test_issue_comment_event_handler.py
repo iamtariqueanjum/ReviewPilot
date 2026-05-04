@@ -2,6 +2,8 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
+
+from app.core.api.models.chatbot_validation_result import ValidationResult
 from app.webhook.event_handlers.issue_comment_event_handler import IssueCommentEventHandler
 
 
@@ -43,7 +45,7 @@ class TestIssueCommentEventHandler:
             assert "test-repo" in call_args  # repo
             assert 1 in call_args  # pr_number
             assert "testuser" in call_args  # sender
-            assert "What issues do you see?" in call_args  # query
+            assert "What issues do you see?" in call_args[-1]  # sanitized query retains question text
 
     def test_on_created_ignores_non_pr_issues(self, sample_issue_comment_payload):
         """Test that on_created ignores comments on issues without PR link."""
@@ -56,9 +58,28 @@ class TestIssueCommentEventHandler:
             # Task should not be queued for regular issues
             # (depends on implementation details)
 
+    def test_on_created_unsafe_query_does_not_queue(self, sample_issue_comment_payload):
+        """Unsafe validation result skips Celery enqueue."""
+        with patch(
+            "app.webhook.event_handlers.issue_comment_event_handler.process_chat_message"
+        ) as mock_task, patch.object(
+            IssueCommentEventHandler,
+            "__init__",
+            lambda self: setattr(self, "validator", MagicMock()),
+        ):
+            handler = IssueCommentEventHandler.__new__(IssueCommentEventHandler)
+            handler.validator = MagicMock()
+            handler.validator.validate.return_value = ValidationResult(
+                is_safe=False,
+                reason="blocked",
+                sanitized_input="",
+            )
+            handler.on_created(sample_issue_comment_payload)
+        mock_task.apply_async.assert_not_called()
+
     def test_on_created_extracts_query_from_comment(self, sample_issue_comment_payload):
         """Test that query is extracted from comment body."""
-        sample_issue_comment_payload["comment"]["body"] = "@reviewpilot Can you find bugs?"
+        sample_issue_comment_payload["comment"]["body"] = "@reviewpilot-ai-bot Can you find bugs?"
         
         with patch('app.webhook.event_handlers.issue_comment_event_handler.process_chat_message') as mock_task:
             handler = IssueCommentEventHandler()
@@ -71,7 +92,7 @@ class TestIssueCommentEventHandler:
 
     def test_on_created_with_multiline_comment(self, sample_issue_comment_payload):
         """Test handling of multiline comments."""
-        sample_issue_comment_payload["comment"]["body"] = """@reviewpilot
+        sample_issue_comment_payload["comment"]["body"] = """@reviewpilot-ai-bot
         Can you review this PR?
         
         Specifically check:
@@ -87,7 +108,7 @@ class TestIssueCommentEventHandler:
 
     def test_on_created_with_special_characters(self, sample_issue_comment_payload):
         """Test handling of comments with special characters."""
-        sample_issue_comment_payload["comment"]["body"] = "@reviewpilot What about <script>alert('test')</script> ?"
+        sample_issue_comment_payload["comment"]["body"] = "@reviewpilot-ai-bot What about <script>alert('test')</script> ?"
         
         with patch('app.webhook.event_handlers.issue_comment_event_handler.process_chat_message') as mock_task:
             handler = IssueCommentEventHandler()

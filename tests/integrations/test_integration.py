@@ -77,10 +77,12 @@ class TestChatbotWorkflow:
                 "pull_request": {"url": "https://api.github.com/repos/test/test-repo/pulls/1"}
             },
             "comment": {
-                "body": "@reviewpilot What are the issues?"
+                "id": 1001,
+                "body": "@reviewpilot-ai-bot What are the issues?"
             },
             "sender": {"login": "testuser"},
             "repository": {
+                "full_name": "testuser/test-repo",
                 "owner": {"login": "testuser"},
                 "name": "test-repo"
             },

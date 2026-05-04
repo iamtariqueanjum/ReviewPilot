@@ -96,14 +96,14 @@ class TestPullRequestEventHandler:
     def test_on_reopened_success(self, sample_pr_payload):
         """Test successful handling of reopened PR."""
         sample_pr_payload["action"] = "reopened"
-        
+
         with patch('app.webhook.event_handlers.pull_request_event_handler.APIClient'), \
              patch('app.webhook.event_handlers.pull_request_event_handler.review_pr') as mock_review_pr:
-            
+
             handler = PullRequestEventHandler()
             result = handler.on_reopened(sample_pr_payload)
-            
-            assert result["status"] == "success"
+
+            assert result is None
             mock_review_pr.apply_async.assert_called_once()
 
     def test_on_closed_merged(self, sample_pr_payload):

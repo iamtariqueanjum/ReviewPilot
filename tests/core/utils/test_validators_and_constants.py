@@ -1,5 +1,7 @@
 """Unit tests for utilities."""
 
+import types
+
 import pytest
 from unittest.mock import patch, MagicMock
 from app.core.utils.security_util import verify_github_webhook
@@ -84,24 +86,24 @@ class TestSecurityUtil:
         """Test invalid webhook signature rejection."""
         body = '{"test": "data"}'
         signature = "sha256=invalidsignature123"
-        
-        # This may raise an exception or return False depending on implementation
-        try:
-            with patch('app.core.utils.security_util.ConfigConstants.GITHUB_WEBHOOK_SECRET', 'test-secret'):
-                result = verify_github_webhook(body, signature)
-        except Exception:
-            pass  # Expected to fail or throw
+
+        fake_constants = types.SimpleNamespace(GITHUB_WEBHOOK_SECRET="test-secret")
+        with patch("app.core.utils.security_util.ConfigConstants", fake_constants):
+            result = verify_github_webhook(body.encode(), signature)
+        assert result is False
 
     def test_verify_github_webhook_missing_secret(self):
         """Test webhook verification with missing secret."""
         body = '{"test": "data"}'
         signature = "sha256=somesignature"
-        
-        with patch('app.core.utils.security_util.ConfigConstants.GITHUB_WEBHOOK_SECRET', None):
-            try:
-                verify_github_webhook(body, signature)
-            except (AttributeError, TypeError):
-                pass  # Expected to fail
+
+        fake_constants = types.SimpleNamespace(GITHUB_WEBHOOK_SECRET="")
+        with patch("app.core.utils.security_util.ConfigConstants", fake_constants):
+            assert verify_github_webhook(body.encode(), signature) is False
+
+        fake_constants_none = types.SimpleNamespace(GITHUB_WEBHOOK_SECRET=None)
+        with patch("app.core.utils.security_util.ConfigConstants", fake_constants_none):
+            assert verify_github_webhook(body.encode(), signature) is False
 
 
 class TestConstants:
@@ -153,9 +155,9 @@ class TestConstants:
     def test_vectorstore_constants_enum(self):
         """Test vectorstore constants."""
         from app.core.utils.constants import VectorStore
-        
+
         assert VectorStore.COLLECTION_NAME.value == "code_chunks"
-        assert VectorStore.VECTOR_SIZE.value == 3072
+        assert str(VectorStore.VECTOR_SIZE.value) == "3072"
 
     def test_language_enum(self):
         """Test language enum."""

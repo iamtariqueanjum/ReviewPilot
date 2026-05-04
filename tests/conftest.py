@@ -139,10 +139,12 @@ def sample_issue_comment_payload():
             "pull_request": {"url": "https://api.github.com/repos/testuser/test-repo/pulls/1"}
         },
         "comment": {
-            "body": "@reviewpilot What issues do you see?"
+            "id": 424242,
+            "body": "@reviewpilot-ai-bot What issues do you see?"
         },
         "sender": {"login": "testuser"},
         "repository": {
+            "full_name": "testuser/test-repo",
             "owner": {"login": "testuser"},
             "name": "test-repo"
         },

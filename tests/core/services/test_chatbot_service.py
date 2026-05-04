@@ -136,57 +136,59 @@ class TestChatbotService:
 
     def test_process_query_format_response(self, mock_github_service, mock_embedding_service, mock_llm):
         """Test response formatting with sender mention."""
+        mock_llm_response = MagicMock()
+        mock_llm_response.content = "The issue is in the logic"
         mock_chain = MagicMock()
-        mock_chain.invoke.return_value = "The issue is in the logic"
+        mock_chain.invoke.return_value = mock_llm_response
         
         with patch('app.core.services.chatbot_service.GithubService', return_value=mock_github_service), \
              patch('app.core.services.chatbot_service.EmbeddingService', return_value=mock_embedding_service), \
              patch('app.core.services.chatbot_service.LLMFactory.get_llm', return_value=mock_llm), \
              patch('app.core.services.chatbot_service.get_chat_runnable', return_value=mock_chain):
-            
-            service = ChatbotService("testuser", "test-repo", 1, 12345)
-            service.chain = mock_chain
-            
+
+            service = ChatbotService("testuser", "test-repo", 1, installation_id=12345)
+
             result = service.process_query("john_doe", "What are the issues?")
-            
+
             assert result["status"] == "success"
-            # Response should mention the sender
-            if "comment" in result.get("body", ""):
-                assert "@john_doe" in result.get("body", "")
+            posted = mock_github_service.post_comment.call_args[0][1]
+            assert "@john_doe" in posted
+            assert "The issue is in the logic" in posted
 
     def test_process_query_long_response(self, mock_github_service, mock_embedding_service, mock_llm):
         """Test processing query with very long response."""
+        mock_llm_response = MagicMock()
+        mock_llm_response.content = "This is a detailed analysis " * 100
         mock_chain = MagicMock()
-        long_response = "This is a detailed analysis " * 100
-        mock_chain.invoke.return_value = long_response
-        
+        mock_chain.invoke.return_value = mock_llm_response
+
         with patch('app.core.services.chatbot_service.GithubService', return_value=mock_github_service), \
              patch('app.core.services.chatbot_service.EmbeddingService', return_value=mock_embedding_service), \
              patch('app.core.services.chatbot_service.LLMFactory.get_llm', return_value=mock_llm), \
              patch('app.core.services.chatbot_service.get_chat_runnable', return_value=mock_chain):
-            
-            service = ChatbotService("testuser", "test-repo", 1, 12345)
-            service.chain = mock_chain
-            
+
+            service = ChatbotService("testuser", "test-repo", 1, installation_id=12345)
+
             result = service.process_query("testuser", "Analyze everything")
-            
+
             assert result["status"] == "success"
 
     def test_process_query_multiple_calls(self, mock_github_service, mock_embedding_service, mock_llm):
         """Test multiple queries in sequence."""
+        mock_llm_response = MagicMock()
+        mock_llm_response.content = "Response"
         mock_chain = MagicMock()
-        mock_chain.invoke.return_value = "Response"
-        
+        mock_chain.invoke.return_value = mock_llm_response
+
         with patch('app.core.services.chatbot_service.GithubService', return_value=mock_github_service), \
              patch('app.core.services.chatbot_service.EmbeddingService', return_value=mock_embedding_service), \
              patch('app.core.services.chatbot_service.LLMFactory.get_llm', return_value=mock_llm), \
              patch('app.core.services.chatbot_service.get_chat_runnable', return_value=mock_chain):
-            
-            service = ChatbotService("testuser", "test-repo", 1, 12345)
-            service.chain = mock_chain
-            
+
+            service = ChatbotService("testuser", "test-repo", 1, installation_id=12345)
+
             result1 = service.process_query("user1", "First question?")
             result2 = service.process_query("user2", "Second question?")
-            
+
             assert result1["status"] == "success"
             assert result2["status"] == "success"
