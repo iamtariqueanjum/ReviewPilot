@@ -1,4 +1,5 @@
 from app.core.api.models.review_response import ReviewLLMResponse
+from app.core.logger import logger
 from app.core.services.embedding_service import EmbeddingService
 from app.integrations.llm.llm_factory import LLMFactory
 from app.integrations.llm.prompts.review_pr.final_prompt import prompt
@@ -20,15 +21,14 @@ class ReviewService:
 
     def review_pr(self, pr_number, head_sha):
         pr_diff = self.github_service.get_pr_diff(pr_number, head_sha)
-        print(f"PR Diff for {self.owner}/{self.repo}#{pr_number}:\n{pr_diff}\n")
         pr_filepaths = self.github_service.get_pr_filepaths(pr_number)
         context = self.embedding_service.get_relevant_context(pr_filepaths)
+        logger.info("Retrieved context for pr %s/%s/%s", self.owner, self.repo, pr_number)
         # TODO exception handling
         llm_response = self.chain.invoke(
             {"pr_diff": pr_diff, "context": context}
         )
-        print(f"LLM response for PR review:\n{llm_response}\n")
         body = get_markdown_review_comment(llm_response)
-        print(f"Generated review comment for {self.owner}/{self.repo}#{pr_number}:\n{body}\n")
+        logger.info("Generated llm review for pr %s/%s/%s", self.owner, self.repo, pr_number)
         self.github_service.post_comment(pr_number, body)
         return {"message": "Review comment posted successfully", "status": "success"}

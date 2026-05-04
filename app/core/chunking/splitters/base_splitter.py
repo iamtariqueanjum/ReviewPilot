@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 
-
 class BaseSplitter(ABC):
 
     def __init__(self):

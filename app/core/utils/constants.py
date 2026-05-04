@@ -45,7 +45,7 @@ class GitHubRoutes(str, Enum):
     INSTALLATION_ACCESS_TOKEN = "/app/installations/{installation_id}/access_tokens"
 
     # Pull Request-related
-    GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}" # TODO remove this redundant
+    GET_PR = "/repos/{owner}/{repo}/pulls/{pull_number}"
     GET_PR_FILES = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
     GET_FILE_CONTENT = "/repos/{owner}/{repo}/contents/{path}?ref={head_sha}"
 
@@ -61,7 +61,6 @@ class GitHubRoutes(str, Enum):
 
 class APIEndpoints(str, Enum):
     GITHUB_WEBHOOK = '/github-webhook'
-    REVIEW_PR = "/review-pr" # TODO remove this API call overhead
 
 
 class ConfigConstants(str, Enum):
@@ -82,6 +81,8 @@ class ConfigConstants(str, Enum):
     CELERY_BROKER_URL = settings.CELERY_BROKER_URL
     CELERY_BACKEND_URL = settings.CELERY_BACKEND_URL
     REDIS_BACKEND_URL = settings.REDIS_BACKEND_URL
+    QDRANT_BACKEND_HOST = settings.QDRANT_BACKEND_HOST
+    QDRANT_BACKEND_PORT = settings.QDRANT_BACKEND_PORT
 
 
 class QueueConstants(str, Enum):

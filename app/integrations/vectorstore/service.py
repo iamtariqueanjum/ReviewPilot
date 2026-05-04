@@ -1,9 +1,9 @@
 import uuid
 
-
 from qdrant_client.models import PointStruct, Filter, FieldCondition, MatchValue
 
 from app.core.utils.constants import VectorStore
+from app.integrations.logger import logger
 from app.integrations.vectorstore.dao import VectorStoreDao
 
 
@@ -15,7 +15,7 @@ class VectorStoreService:
 
     @staticmethod
     def chunk_to_point(chunk):
-        print(f"Chunk to Point: file_path-{chunk["file_path"]}-chunk_id-{chunk["chunk_id"]}")
+        logger.info("Chunk to Point: file_path-%s-chunk_id-%s", chunk["file_path"], chunk["chunk_id"])
         return {
             "id": str(uuid.uuid4()),
             "vector": chunk["embedding"],
@@ -44,14 +44,14 @@ class VectorStoreService:
             PointStruct(**self.chunk_to_point(chunk))
             for chunk in chunks
         ]
-        print(f"UPSERTING CHUNKS: {points}")
         try:
             response = self.dao.client.upsert(
                 collection_name=VectorStore.COLLECTION_NAME.value,
                 points=points
             )
+            logger.info("Upsert chunks response: %s", response)
         except Exception as e:
-            # TODO logger
+            logger.exception("Error while upserting chunks: %s", str(e))
             return None
         return response
 

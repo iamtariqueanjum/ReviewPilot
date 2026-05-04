@@ -1,7 +1,7 @@
-from app.core.logger import logger
 from app.core.utils.constants import GitHubRoutes, HTTPMethod
 from app.integrations.github.client import GitHubClient
 from app.integrations.github.repo_service import RepoService
+from app.integrations.logger import logger
 
 
 class PrService:
@@ -22,17 +22,14 @@ class PrService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
+                logger.info("Successfully fetched PR details for %s/%s#%s", self.owner, self.repo, pr_number)
                 return body
-            # TODO check logs
             logger.error("Failed to fetch PR details for %s/%s#%s: status=%s body=%s",
                          self.owner, self.repo, pr_number, status, body)
-            print(f"Failed to fetch PR details for {self.owner}/{self.repo}#{pr_number}: status={status} body={body}")
-            raise ValueError(f"Failed to fetch PR details for {self.owner}/{self.repo}#{pr_number}: status={status}")
-
+            raise ValueError(
+                f"Failed to fetch PR details for {self.owner}/{self.repo}#{pr_number}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while fetching PR details for %s/%s#%s", self.owner, self.repo, pr_number)
             raise
 
@@ -47,7 +44,6 @@ class PrService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
                 response = []
                 for file in body:
@@ -55,15 +51,13 @@ class PrService:
                     patch = file.get("patch")
                     status = file.get("status")
                     response.append({"filename": filename, "patch": patch, "status": status})
+                logger.info("Successfully fetched PR file details for %s/%s", self.owner, self.repo)
                 return response
-            # TODO check logs
             logger.error("Failed to fetch PR file details for %s/%s#%s: status=%s body=%s",
                          self.owner, self.repo, pr_number, status, body)
             raise ValueError(
-                f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status}")
-
+                f"Failed to fetch PR file details for {self.owner}/{self.repo}#{pr_number}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while fetching PR file details for %s/%s#%s", self.owner, self.repo, pr_number)
             raise
 

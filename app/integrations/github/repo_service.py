@@ -1,8 +1,8 @@
 import base64
 
-from app.core.logger import logger
 from app.core.utils.constants import GitHubRoutes, HTTPMethod
 from app.integrations.github.client import GitHubClient
+from app.integrations.logger import logger
 
 
 class RepoService:
@@ -21,18 +21,14 @@ class RepoService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
-                print(f"Successfully retrieved repo details for {self.owner}/{self.repo}")
-                print(f"GitHub response: status={status} body={body}")
+                logger.info("Successfully fetched repository details for %s/%s", self.owner, self.repo)
                 return body
-            # TODO check logs
             logger.error("Failed to retrieve repo details for %s/%s: status=%s body=%s",
                          self.owner, self.repo, status, body)
-            print(f"Failed to retrieve repo details for {self.owner}/{self.repo}: status={status} body={body}")
-            raise ValueError(f"Failed to retrieve repo details for {self.owner}/{self.repo}: status={status}")
+            raise ValueError(
+                f"Failed to retrieve repo details for {self.owner}/{self.repo}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while retrieving repo details for %s/%s", self.owner, self.repo)
             raise
 
@@ -46,18 +42,14 @@ class RepoService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
-                print(f"Successfully retrieved branch details for {self.owner}/{self.repo}/{branch}")
-                print(f"GitHub response: status={status} body={body}")
+                logger.info("Successfully fetched branch details for %s/%s/%s", self.owner, self.repo, branch)
                 return body
-            # TODO check logs
             logger.error("Failed to retrieve branch details for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, branch, status, body)
             raise ValueError(
-                f"Failed to retrieve branch details for {self.owner}/{self.repo}/{branch}: status={status}")
+                f"Failed to retrieve branch details for {self.owner}/{self.repo}/{branch}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while retrieving branch details for %s/%s/%s", self.owner, self.repo, branch)
             raise
 
@@ -71,18 +63,14 @@ class RepoService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
-                print(f"Successfully retrieved tree details for {self.owner}/{self.repo}/{tree_sha}")
-                print(f"GitHub response: status={status} body={body}")
+                logger.info("Successfully fetched tree details for %s/%s/%s", self.owner, self.repo, tree_sha)
                 return body
-            # TODO check logs
             logger.error("Failed to retrieve tree details for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, tree_sha, status, body)
             raise ValueError(
-                f"Failed to retrieve tree details for {self.owner}/{self.repo}/{tree_sha}: status={status}")
+                f"Failed to retrieve tree details for {self.owner}/{self.repo}/{tree_sha}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while retrieving tree details for %s/%s/%s", self.owner, self.repo, tree_sha)
             raise
 
@@ -98,22 +86,19 @@ class RepoService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
-                return base64.b64decode(body.get("content", "")).decode("utf-8")
-
+                response = base64.b64decode(body.get("content", "")).decode("utf-8")
+                logger.info("Successfully fetched file content for %s/%s#%s", self.owner, self.repo, path)
+                return response
             if status and status == 404:
                 logger.warning("File content not found for %s/%s#%s: status=%s body=%s",
-                               self.owner, self.repo, path, status, body)
+                             self.owner, self.repo, path, status, body)
                 return ""
-
-            # TODO check logs
             logger.error("Failed to fetch PR file content for %s/%s#%s: status=%s body=%s",
                          self.owner, self.repo, path, status, body)
-            raise ValueError(f"Failed to fetch PR file content for {self.owner}/{self.repo}#{path}: status={status}")
-
+            raise ValueError(
+                f"Failed to fetch PR file content for {self.owner}/{self.repo}#{path}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while fetching PR file content for %s/%s#%s", self.owner, self.repo, path)
             raise
 
@@ -127,17 +112,14 @@ class RepoService:
             result = self.client.call_api(HTTPMethod.GET, path)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300:
-                print(f"Successfully retrieved blob content for {self.owner}/{self.repo}/{file_sha}")
-                print(f"GitHub response: status={status} body={body}")
-                return base64.b64decode(body.get("content", "")).decode("utf-8")
-            # TODO check logs
+                response = base64.b64decode(body.get("content", "")).decode("utf-8")
+                logger.info("Successfully fetched blob content for %s/%s/%s", self.owner, self.repo, file_sha)
+                return response
             logger.error("Failed to retrieve blob content for %s/%s/%s: status=%s body=%s",
                          self.owner, self.repo, file_sha, status, body)
             raise ValueError(
-                f"Failed to retrieve blob content for {self.owner}/{self.repo}/{file_sha}: status={status}")
+                f"Failed to retrieve blob content for {self.owner}/{self.repo}/{file_sha}: status={status} body={body}")
         except Exception:
-            # TODO check logs
             logger.exception("Error while retrieving blob content for %s/%s/%s", self.owner, self.repo, file_sha)
             raise

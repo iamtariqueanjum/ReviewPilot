@@ -13,8 +13,7 @@ class TestWebhookEventDispatcher:
         """Test WebhookEventDispatcher initialization."""
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler'), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'):
             
             dispatcher = WebhookEventDispatcher()
             
@@ -22,7 +21,6 @@ class TestWebhookEventDispatcher:
             assert GitHubWHEvent.PULL_REQUEST in dispatcher.handlers
             assert GitHubWHEvent.INSTALLATION in dispatcher.handlers
             assert GitHubWHEvent.ISSUE_COMMENT in dispatcher.handlers
-            assert GitHubWHEvent.PUSH in dispatcher.handlers
 
     def test_dispatch_pull_request_event(self, sample_pr_payload):
         """Test dispatching pull request event."""
@@ -31,8 +29,7 @@ class TestWebhookEventDispatcher:
         
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler', return_value=mock_handler), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'):
             
             dispatcher = WebhookEventDispatcher()
             result = dispatcher.dispatch(GitHubWHEvent.PULL_REQUEST, sample_pr_payload)
@@ -47,8 +44,7 @@ class TestWebhookEventDispatcher:
         
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler'), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler', return_value=mock_handler), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler', return_value=mock_handler):
             
             dispatcher = WebhookEventDispatcher()
             result = dispatcher.dispatch(GitHubWHEvent.ISSUE_COMMENT, sample_issue_comment_payload)
@@ -64,28 +60,10 @@ class TestWebhookEventDispatcher:
         
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler'), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler', return_value=mock_handler), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'):
             
             dispatcher = WebhookEventDispatcher()
             result = dispatcher.dispatch(GitHubWHEvent.INSTALLATION, payload)
-            
-            mock_handler.handle.assert_called_once_with(payload)
-            assert result["status"] == "success"
-
-    def test_dispatch_push_event(self):
-        """Test dispatching push event."""
-        payload = {"ref": "refs/heads/main", "repository": {"name": "test-repo"}}
-        mock_handler = MagicMock()
-        mock_handler.handle.return_value = {"status": "success"}
-        
-        with patch('app.webhook.event_dispatcher.PullRequestEventHandler'), \
-             patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler', return_value=mock_handler):
-            
-            dispatcher = WebhookEventDispatcher()
-            result = dispatcher.dispatch(GitHubWHEvent.PUSH, payload)
             
             mock_handler.handle.assert_called_once_with(payload)
             assert result["status"] == "success"
@@ -94,8 +72,7 @@ class TestWebhookEventDispatcher:
         """Test dispatching unknown event."""
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler'), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'):
             
             dispatcher = WebhookEventDispatcher()
             result = dispatcher.dispatch("unknown_event", {})
@@ -110,8 +87,7 @@ class TestWebhookEventDispatcher:
         
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler', return_value=mock_handler), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler'):
             
             dispatcher = WebhookEventDispatcher()
             
@@ -133,8 +109,7 @@ class TestWebhookEventDispatcher:
         
         with patch('app.webhook.event_dispatcher.PullRequestEventHandler', return_value=mock_pr_handler), \
              patch('app.webhook.event_dispatcher.InstallationEventHandler'), \
-             patch('app.webhook.event_dispatcher.IssueCommentEventHandler', return_value=mock_comment_handler), \
-             patch('app.webhook.event_dispatcher.PushEventHandler'):
+             patch('app.webhook.event_dispatcher.IssueCommentEventHandler', return_value=mock_comment_handler):
             
             dispatcher = WebhookEventDispatcher()
             
@@ -145,4 +120,3 @@ class TestWebhookEventDispatcher:
             assert result2["status"] == "success"
             mock_pr_handler.handle.assert_called_once()
             mock_comment_handler.handle.assert_called_once()
-

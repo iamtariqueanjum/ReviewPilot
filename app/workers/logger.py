@@ -6,4 +6,4 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     force=True,
 )
-logger = logging.getLogger("review_pilot.core")
+logger = logging.getLogger("review_pilot.workers")
