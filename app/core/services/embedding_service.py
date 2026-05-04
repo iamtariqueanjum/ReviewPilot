@@ -25,7 +25,8 @@ class EmbeddingService:
         branch_details = self.github_service.get_branch(branch=default_branch)
         commit_sha = branch_details.get('commit', {}).get('sha')
         if not commit_sha:
-            raise ValueError(f"Could not find commit SHA for {self.owner}/{self.repo} default branch {default_branch}")
+            logger.error("No commit sha found for %s/%s default branch-%s", self.owner, self.repo, default_branch)
+            raise ValueError(f"Could not find commit SHA for {self.owner}/{self.repo} default branch-{default_branch}")
         tree_details = self.github_service.get_tree_recursive(tree_sha=commit_sha)
         lang_extensions = { # TODO make this configurable
             "Python": ["py"],
@@ -42,7 +43,7 @@ class EmbeddingService:
                 file_sha = item.get('sha')
                 file_content = self.github_service.get_blob_content(file_sha=file_sha)
                 if file_extension not in ignore_files:
-                    logger.info("[WORKER] Processing file %s with extension: %s for repo: %s/%s",
+                    logger.info("Processing file %s with extension: %s for repo: %s/%s",
                                 file_path, file_extension, self.owner, self.repo)
                     for language, extensions in lang_extensions.items():
                         if file_extension in extensions:
@@ -71,7 +72,7 @@ class EmbeddingService:
                 result = chain.invoke({"code": code}) # TODO Batch processing optimisation
                 chunk['summary'] = result.content
             except Exception as e:
-                logger.error("[WORKER] Failed to generate code summary for chunk %s: %s", chunk.get('chunk_id'), str(e))
+                logger.exception("Failed to generate code summary for chunk %s: %s", chunk.get('chunk_id'), str(e))
                 chunk['summary'] = "Summary not available"
                 # TODO add retry mechanism and Handle Partial Failures
         return chunks
@@ -86,6 +87,7 @@ class EmbeddingService:
                 input=content
             )
         except Exception as e: # TODO exception handling
+            logger.exception("Failed to generate embeddings for content: %s. Error: %s", content, str(e))
             raise e
         return response
 

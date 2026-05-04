@@ -1,6 +1,7 @@
 import ast
 
 from app.core.chunking.splitters.base_splitter import BaseSplitter
+from app.core.logger import logger
 
 
 class PythonSplitter(BaseSplitter):
@@ -43,7 +44,8 @@ class PythonSplitter(BaseSplitter):
                     })
                     chunk_index += 1
         except Exception as e:
-            # TODO logger
+            logger.exception("Error while splitting file %s/%s/%s: %s",
+                             payload['owner'], payload['repo'], payload['file_path'], str(e))
             # TODO Fallback splitter
             raise e
         return chunks

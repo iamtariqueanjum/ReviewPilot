@@ -19,6 +19,6 @@ def verify_github_webhook(payload_body: bytes, signature: str) -> bool:
             hashlib.sha256
         ).hexdigest()
         return hmac.compare_digest(expected_signature, signature)
-    except Exception:
-        logger.exception("Error while verifying GitHub webhook signature")
+    except Exception as err:
+        logger.exception("Error while verifying GitHub webhook signature: %s", str(err))
         return False
