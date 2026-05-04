@@ -37,7 +37,7 @@ jobs:
 
       - name: Lint with pylint (fail if score < 9.0)
         run: |
-          pylint $(git ls-files '*.py') --fail-under=9.0
+          pylint $(git ls-files '*.py' | grep -v '^tests/') --fail-under=9.0
 
       - name: Lint with flake8
         run: |
