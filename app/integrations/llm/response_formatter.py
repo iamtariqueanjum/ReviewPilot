@@ -4,7 +4,7 @@ def get_markdown_review_comment(response):
     issues = getattr(response, "issues", [])
 
     if not issues:
-        markdown_review_comment = "No issues found! Great job! 🎉"
+        markdown_review_comment = "No issues found! Great job!"
         return markdown_review_comment
     table = []
     for issue in issues:

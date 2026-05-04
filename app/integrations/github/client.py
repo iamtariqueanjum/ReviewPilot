@@ -9,8 +9,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from app.core.utils.constants import ConfigConstants, GitHubRoutes, HTTPMethod
 from app.integrations.github.auth import generate_jwt
-
-from app.core.logger import logger
+from app.integrations.logger import logger
 
 
 class GitHubClient:
@@ -23,8 +22,8 @@ class GitHubClient:
         self.retry_strategy = Retry(
             total=retries,
             backoff_factor=0.3,
-            status_forcelist=[429, 500, 502, 503, 504], # TODO add other statuses if needed
-            allowed_methods=["GET", "POST"], # TODO add other methods if needed
+            status_forcelist=[408, 429, 500, 502, 503, 504],
+            allowed_methods=["GET"],
         )
         self.timeout = timeout
         self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
@@ -65,7 +64,6 @@ class GitHubClient:
                     response = {"status_code": resp.status_code, "body": resp.json()}
                 except Exception as _:
                     response = {"status_code": resp.status_code, "body": getattr(resp, 'text', None)}
-        print(f"API call: {method} {path} response: {response}")
         return response
 
     def get_installation_access_token(self) -> str:
@@ -73,17 +71,14 @@ class GitHubClient:
             cache_data = self._token_cache.get(self.installation_id)
             if cache_data and cache_data.get("expires_at") > time.time():
                 return cache_data["token"]
-
             path = GitHubRoutes.INSTALLATION_ACCESS_TOKEN.value.format(installation_id=self.installation_id)
             headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {generate_jwt()}"}
             result = self.call_api(HTTPMethod.POST, path, headers=headers)
             status = result.get("status_code")
             body = result.get("body")
-
             if status and 200 <= status < 300 and isinstance(body, dict):
                 token = body.get("token")
                 expires_at = time.time() + 3600     # 1hr ttl
-
                 if token:
                     self._token_cache[self.installation_id] = {
                         'token': token,
@@ -91,7 +86,6 @@ class GitHubClient:
                     }
                     return token
                 raise ValueError("GitHub response did not contain an access token")
-
             logger.error("Failed to fetch installation token: status=%s body=%s", status, body)
             raise ValueError(f"Failed to fetch installation token: status={status}")
         except Exception:

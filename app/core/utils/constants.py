@@ -82,6 +82,8 @@ class ConfigConstants(str, Enum):
     CELERY_BROKER_URL = settings.CELERY_BROKER_URL
     CELERY_BACKEND_URL = settings.CELERY_BACKEND_URL
     REDIS_BACKEND_URL = settings.REDIS_BACKEND_URL
+    QDRANT_BACKEND_HOST = settings.QDRANT_BACKEND_HOST
+    QDRANT_BACKEND_PORT = settings.QDRANT_BACKEND_PORT
 
 
 class QueueConstants(str, Enum):

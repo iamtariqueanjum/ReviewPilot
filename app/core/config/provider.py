@@ -24,6 +24,8 @@ class ConfigSettings(BaseSettings):
     CELERY_BROKER_URL: str = Field(default="", env="CELERY_BROKER_URL")
     CELERY_BACKEND_URL: str = Field(default="", env="CELERY_BACKEND_URL")
     REDIS_BACKEND_URL: str = Field(default="", env="REDIS_BACKEND_URL")
+    QDRANT_BACKEND_HOST: str = Field(default="localhost", env="QDRANT_BACKEND_HOST")
+    QDRANT_BACKEND_PORT: int = Field(default=6333, env="QDRANT_BACKEND_PORT")
 
     class Config:
         env_file = ".env"
